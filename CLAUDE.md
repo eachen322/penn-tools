@@ -134,6 +134,7 @@ Turn text into vectors for semantic search, stored with pgvector in the tool's o
 - **All changes must stay within the tool's two directories.** Only the APIs listed above are available. If a team needs something beyond these, explain that they should request it from the Platform team — do not add it yourself.
 - **Do not create routes under `apps/web/src/app/api/`.** Those are platform routes; only the Platform team creates them. A tool may add its own routes or server actions inside its landing page folder (`apps/web/src/app/tools/{id}/`), as Compass and Career Canvas do.
 - **Do not duplicate platform logic.** If the Platform Playground already demonstrates the pattern, adapt it — don't reinvent it.
+- **Never read users' saved API keys.** Users save their own OpenAI and Anthropic keys on `/settings`, stored in plain text. Tool code must not import `userApiKeys` from `@/lib/container` or query the `user_api_keys` table. Make LLM calls through the LLM API above.
 
 ---
 

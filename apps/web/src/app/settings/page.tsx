@@ -3,10 +3,12 @@
 
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
+import { userApiKeys } from "@/lib/container";
 import { SignOutButton } from "@/components/layout/AuthButtons";
 import { SignInPrompt } from "@/components/layout/SignInPrompt";
 import { ProfileAvatar } from "@/components/layout/ProfileAvatar";
 import cardPage from "@/components/layout/CardPage.module.css";
+import { ApiKeys } from "./ApiKeys";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -19,6 +21,8 @@ export default async function SettingsPage() {
   if (!user) {
     return <SignInPrompt title="Account settings" message="Sign in to see and change your account settings." />;
   }
+
+  const savedKeys = await userApiKeys.list(user.id);
 
   return (
     <div className={cardPage.page}>
@@ -37,8 +41,12 @@ export default async function SettingsPage() {
       </section>
 
       <section className={cardPage.card}>
-        <h2 className={styles.heading}>Preferences</h2>
-        <p className={cardPage.muted}>Settings such as your own AI API keys and model preferences will appear here.</p>
+        <h2 className={styles.heading}>API keys</h2>
+        <p className={cardPage.muted}>
+          Save your own OpenAI and Anthropic API keys. AskPenn and tools will start using them in an upcoming update.
+        </p>
+        <ApiKeys saved={savedKeys} />
+        <p className={cardPage.muted}>After you save a key, only its last four characters are shown.</p>
       </section>
 
       <div>

@@ -2,7 +2,7 @@
 
 import { signIn, signOut } from "next-auth/react";
 import type { SignInProvider } from "@/lib/auth";
-import styles from "./AuthButtons.module.css";
+import styles from "./Buttons.module.css";
 
 /**
  * Starts sign-in with the given provider (see signInProvider in lib/auth.ts)
@@ -12,7 +12,7 @@ export function SignInButton({ provider }: { provider: SignInProvider | null }) 
   return (
     <button
       type="button"
-      className={styles.signIn}
+      className={styles.primary}
       onClick={() => provider && signIn(provider)}
       disabled={!provider}
       title={provider ? undefined : "Sign-in isn't configured on this server."}
@@ -24,7 +24,7 @@ export function SignInButton({ provider }: { provider: SignInProvider | null }) 
 
 export function SignOutButton() {
   return (
-    <button type="button" className={styles.signOut} onClick={() => signOut()}>
+    <button type="button" className={styles.ghost} onClick={() => signOut()}>
       Log out
     </button>
   );

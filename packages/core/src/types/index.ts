@@ -23,6 +23,19 @@ export interface User {
   pennId: string | null;
 }
 
+// ── Saved API keys ──────────────────────────────────────────────────────────
+
+/** An LLM provider a user can save their own API key for. */
+export type ApiKeyProvider = "openai" | "anthropic";
+
+/** What may be shown about a saved key: never the key itself. */
+export interface SavedApiKey {
+  provider: ApiKeyProvider;
+  /** The key's last four characters. */
+  last4: string;
+  updatedAt: Date;
+}
+
 // ── Chat ────────────────────────────────────────────────────────────────────
 
 export type ChatId = string;

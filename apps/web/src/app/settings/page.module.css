@@ -13,3 +13,47 @@
 .name {
   font-weight: 600;
 }
+
+/* API keys */
+
+.keyRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.keyRow:last-child { border-bottom: 1px solid var(--border); }
+
+.keyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.keyControls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.keyInput {
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.link {
+  color: var(--penn-blue);
+}
+
+.error {
+  color: #b42318;
+  font-size: 0.875rem;
+}

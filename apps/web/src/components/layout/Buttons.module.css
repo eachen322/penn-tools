@@ -1,4 +1,6 @@
-.signIn {
+/* Shared button styles: the header's Sign in / Log out and the settings page. */
+
+.primary {
   height: 34px;
   padding: 0 16px;
   border-radius: 999px;
@@ -8,10 +10,9 @@
   font-weight: 600;
   transition: background-color 160ms ease;
 }
-.signIn:hover:not(:disabled) { background: #163983; }
-.signIn:disabled { opacity: 0.5; cursor: not-allowed; }
+.primary:hover:not(:disabled) { background: #163983; }
 
-.signOut {
+.ghost {
   height: 34px;
   padding: 0 12px;
   border-radius: 8px;
@@ -19,4 +20,7 @@
   font-size: 0.875rem;
   transition: background-color 160ms ease;
 }
-.signOut:hover { background: var(--nav-hover); }
+.ghost:hover:not(:disabled) { background: var(--nav-hover); }
+
+.primary:disabled,
+.ghost:disabled { opacity: 0.5; cursor: not-allowed; }

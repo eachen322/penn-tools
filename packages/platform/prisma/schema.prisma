@@ -42,8 +42,33 @@ model User {
   chats     Chat[]
   messages  Message[]
   toolData  ToolData[]
+  apiKeys   UserApiKey[]
 
   @@map("users")
+}
+
+/// A user's own LLM API key, entered on the settings page; at most one per
+/// provider. The key is stored in plain text, so it is never sent back to the
+/// browser or exposed to tools (see UserApiKeyRepository).
+model UserApiKey {
+  id        String   @id @default(uuid())
+  userId    String         @map("user_id")
+  provider  ApiKeyProvider
+  secret    String
+  /// The key's last four characters, shown on the settings page.
+  last4     String
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@map("user_api_keys")
+}
+
+enum ApiKeyProvider {
+  OPENAI
+  ANTHROPIC
 }
 
 // ── Chats ─────────────────────────────────────────────────────────────────────

@@ -21,8 +21,10 @@ import {
   PrismaMessageRepository,
   PrismaToolDataRepository,
   PrismaUserRepository,
+  PrismaUserApiKeyRepository,
   PrismaResourceRepository,
 } from "@penntools/platform/db";
+import type { UserApiKeyRepository } from "@penntools/core/repositories";
 import { OpenAIAdapter, AnthropicAdapter } from "@penntools/platform/llm";
 import { OpenAIEmbeddingAdapter } from "@penntools/platform/embeddings";
 import type { EmbeddingProvider } from "@penntools/core/embeddings";
@@ -71,6 +73,10 @@ export const repositories = {
   toolData: new PrismaToolDataRepository(prisma),
   users: new PrismaUserRepository(prisma),
 };
+
+// Kept out of `repositories`, which tools receive as `context.db`: tool code
+// must never be able to read users' keys.
+export const userApiKeys: UserApiKeyRepository = new PrismaUserApiKeyRepository(prisma);
 
 // ── Embedding provider ─────────────────────────────────────────────────────
 // Only OpenAI provides an embeddings API we currently support.

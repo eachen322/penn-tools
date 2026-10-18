@@ -179,7 +179,9 @@ tool pages. It is a server component that calls `getCurrentUser()`:
   `signInProvider` (Google, or the local development user) and returns to the
   same page. It is disabled when sign-in isn't configured.
 - **Signed in:** the profile picture (or initial), linking to account settings
-  at `/settings`, and **Log out**, which signs out and stays on the page.
+  at `/settings` (the Google profile, and the user's own OpenAI and Anthropic
+  API keys; see `user_api_keys` under **Data model**), and **Log out**, which
+  signs out and stays on the page.
 
 Pages that need a user render `SignInPrompt` for signed-out visitors instead of
 their content (`/ask` and `/settings` do). Because `getCurrentUser()` reads the
@@ -210,6 +212,12 @@ See `packages/platform/prisma/schema.prisma` for the canonical schema.
 Key design choices:
 - `tool_data` uses a generic `(userId, toolId, key) → jsonValue` pattern so tools
   can persist state without needing their own migrations.
+- `user_api_keys` holds the OpenAI and Anthropic keys users save on `/settings`
+  (at most one per provider), in plain text. Keys are checked with the provider
+  before saving and never sent back to the browser; the page shows only the last
+  four characters. The repository is `userApiKeys` in `container.ts`, kept out of
+  `repositories` so tools (which get `repositories` as `context.db`) cannot read
+  keys. The LLM routes don't use saved keys yet.
 - Tools that need real tables (queries across users, relations, search) get their
   own Postgres role and schema in the same database, never tables in `public`,
   which `prisma db push` manages and would drop. `db:deploy` (`prisma db push`,
