@@ -82,10 +82,12 @@ describe("sanitizeRecord — prompt injection protection", () => {
     expect(reason).toMatch(/title/i);
   });
 
-  it("rejects instructor name with backticks or braces", () => {
+  // Instructor is optional (sparse xlsx files have none), so an unsafe value is
+  // dropped rather than rejecting the whole record.
+  it("drops an instructor name with backticks or braces", () => {
     const raw = { ...VALID_RAW, instructor: "Prof `rm -rf /`" };
     const { record } = sanitizeRecord(raw, "Spring2024");
-    expect(record).toBeNull();
+    expect(record?.instructor).toBe("");
   });
 
   it("rejects title with newlines", () => {
@@ -117,9 +119,15 @@ describe("sanitizeRecord — field validation", () => {
     expect(sanitizeRecord({ ...VALID_RAW, clearingPrice: 5000 }, "Spring2024").record).not.toBeNull();
   });
 
-  it("rejects invalid credit units", () => {
-    expect(sanitizeRecord({ ...VALID_RAW, cu: 0 }, "Spring2024").record).toBeNull();
+  it("rejects credit units outside 0.5–5", () => {
+    expect(sanitizeRecord({ ...VALID_RAW, cu: 0.25 }, "Spring2024").record).toBeNull();
     expect(sanitizeRecord({ ...VALID_RAW, cu: 6 }, "Spring2024").record).toBeNull();
+  });
+
+  it("treats missing or zero credit units as not given", () => {
+    const { cu: _cu, ...withoutCu } = VALID_RAW;
+    expect(sanitizeRecord(withoutCu, "Spring2024").record?.creditUnits).toBe(0);
+    expect(sanitizeRecord({ ...VALID_RAW, cu: 0 }, "Spring2024").record?.creditUnits).toBe(0);
   });
 
   it("rejects malformed term", () => {
@@ -133,8 +141,9 @@ describe("sanitizeRecord — field validation", () => {
     expect(record).toBeNull();
   });
 
-  it("rejects invalid day abbreviation", () => {
+  // Days are optional, so unrecognised ones are left out rather than rejected.
+  it("ignores an invalid day abbreviation", () => {
     const { record } = sanitizeRecord({ ...VALID_RAW, days: "XY" }, "Spring2024");
-    expect(record).toBeNull();
+    expect(record?.days).toEqual([]);
   });
 });
