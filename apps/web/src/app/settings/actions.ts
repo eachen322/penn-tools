@@ -9,7 +9,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { ApiKeyProvider, SavedApiKey } from "@penntools/core/types";
-import { checkApiKey } from "@penntools/platform/llm";
+import { checkApiKey } from "@penntools/platform/ai";
 import { getCurrentUser } from "@/lib/auth";
 import { userApiKeys, logger } from "@/lib/container";
 import { API_KEY_PROVIDERS, apiKeyFormatError, isApiKeyProvider } from "./apiKeyProviders";

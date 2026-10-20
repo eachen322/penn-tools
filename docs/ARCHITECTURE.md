@@ -11,14 +11,16 @@
 ├──────────────────────────────────────────────────────────┤
 │  packages/platform  (reads env vars, constructs clients) │
 │   ├─ Prisma repositories                                 │
-│   ├─ LLM adapters (OpenAI, Anthropic)                    │
-│   ├─ Embedding adapter (OpenAI)                          │
+│   ├─ AI adapters (OpenAI Responses, Anthropic Messages)  │
+│   ├─ Legacy LLM adapters (OpenAI, Anthropic)             │
+│   ├─ Embedding adapters (OpenAI)                         │
 │   ├─ Analytics (PostHog)                                 │
 │   └─ Tool databases (toolSql; setup-tools for db:deploy) │
 ├──────────────────────────────────────────────────────────┤
 │  packages/core  (pure interfaces, no env, no vendor SDK) │
 │   ├─ Tool, ToolRegistry, ToolRunner, ToolContext         │
-│   ├─ LLMProvider, EmbeddingProvider interfaces           │
+│   ├─ AI API types, model catalog, AIError, z (Zod)       │
+│   ├─ EmbeddingProvider, legacy LLMProvider interfaces    │
 │   ├─ Analytics interface                                 │
 │   └─ Repository interfaces (Chat, Message, ToolData…)   │
 ├──────────────────────────────────────────────────────────┤
@@ -32,7 +34,7 @@
 
 | Package | May import from | Must NOT import from |
 |---------|----------------|---------------------|
-| `core` | nothing except Node builtins | `platform`, `env`, any vendor SDK |
+| `core` | Node builtins, `zod` (re-exported as `z` for AI schemas) | `platform`, `env`, any vendor SDK |
 | `platform` | `core`, vendor SDKs, `process.env` | `apps/web`, `tools/*` |
 | `tools/*` | `core` only | `platform`, `process.env`, fetch, Prisma |
 | `apps/web` | `core`, `platform`, `tools/*` | — |
@@ -128,7 +130,8 @@ if (!toolRegistry.get("course-finder")) {
 ```
 
 `ToolRunner.run(toolId, input, userId)` looks up the tool, checks `canAccess()`,
-builds a `ToolContext` (injecting db, llm, analytics, logger, config), and
+builds a `ToolContext` (injecting db, llm, ai, embeddings, analytics, logger,
+config), and
 calls `tool.execute(input, context)`.
 
 ### Tool invocation routing (v1)
@@ -147,6 +150,42 @@ directly.
 2. Parse the model's `tool_call` output.
 3. Run the selected tool, append a `tool` role message.
 4. Call LLM again with the tool output for a final synthesised reply.
+
+---
+
+## AI API
+
+New tools generate text and structured data through `@penntools/core/ai`;
+existing tools keep the legacy LLM API (`context.llm`, `/api/llm/complete`)
+until they migrate, after which it is deleted. How to call it is in CLAUDE.md
+section 4; this section covers the design.
+
+- **Keys stay server-side.** `createUserAI(userId)` in `container.ts` builds an
+  `AI` whose calls use that user's saved key for the requested provider, and
+  fail with `missing_key` when there is none; the platform's keys are never
+  used for generation. Tools get it as `context.ai`, or from `getAI()`
+  (`apps/web/src/lib/ai.ts`, bound to the signed-in user). Keys stay inside the
+  adapters' closures, and `AIError` messages are written by the platform, so no
+  key reaches tool code or logs.
+- **One model catalog.** The tool picks the provider; models and their default
+  reasoning come from `packages/core/src/ai/models.ts`, so changing a model is
+  a one-file change. Requests are checked against a Zod schema in `createAI`,
+  since they can carry browser input.
+- **Adapters** (`packages/platform/src/ai/`): OpenAI's Responses API and
+  Anthropic's Messages API, each a single `stream()`. `createAI` builds
+  `generate()` and `generateObject()` by collecting the stream, so every request
+  streams and long replies never hit non-streaming limits. For
+  `generateObject`, the adapter sends the Zod schema as structured output and
+  returns the raw text; `createAI` checks the stop reason (refused, cut off)
+  before parsing and validating.
+- **Errors.** Every failure reaching a tool is an `AIError` (aborts excepted):
+  provider errors map to a kind, and anything else (a connection dropped
+  mid-stream, a bug) becomes `unavailable` and is logged in full.
+- **Embeddings.** Always OpenAI with `EMBEDDING_MODEL`. Seeds (`db:deploy`) use
+  the platform's key. Search queries (`context.embeddings`, `getEmbeddings`)
+  use the user's OpenAI key, or `OPENAI_API_KEY` when they haven't saved one;
+  each platform-key call logs `embeddings.platform_key`, and its cost shows on
+  that key in OpenAI's usage dashboard.
 
 ---
 
@@ -216,8 +255,9 @@ Key design choices:
   (at most one per provider), in plain text. Keys are checked with the provider
   before saving and never sent back to the browser; the page shows only the last
   four characters. The repository is `userApiKeys` in `container.ts`, kept out of
-  `repositories` so tools (which get `repositories` as `context.db`) cannot read
-  keys. The LLM routes don't use saved keys yet.
+  `repositories` (which tools get as `context.db`), so tools never receive keys;
+  tool code must not import it either. The AI API reads keys on the tool's
+  behalf.
 - Tools that need real tables (queries across users, relations, search) get their
   own Postgres role and schema in the same database, never tables in `public`,
   which `prisma db push` manages and would drop. `db:deploy` (`prisma db push`,
@@ -247,8 +287,8 @@ and `apps/web/src/lib/auth.ts`. Core interfaces and tools never access `process.
 | Variable | Used by | Purpose |
 |----------|---------|---------|
 | `DATABASE_URL` | platform/prisma, `db:deploy` | Postgres admin connection; tool role passwords are derived from it |
-| `OPENAI_API_KEY` | platform/llm, platform/embeddings, `db:deploy` | OpenAI adapter, embeddings, and tool seeds (e.g. Career Canvas course embeddings; skipped when unset) |
-| `ANTHROPIC_API_KEY` | platform/llm | Anthropic adapter |
+| `OPENAI_API_KEY` | platform/embeddings, web/lib/container, `db:deploy`, platform/llm | Embeddings: tool seeds (e.g. Career Canvas course embeddings; skipped when unset) and search queries from users without their own OpenAI key. Also the legacy LLM API |
+| `ANTHROPIC_API_KEY` | platform/llm | Legacy LLM API only; the AI API uses users' own keys |
 | `POSTHOG_API_KEY` | platform/analytics | Event tracking |
 | `POSTHOG_HOST` | platform/analytics | PostHog instance URL |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web/lib/auth | Google sign-in (OAuth client); without them, development signs in as a local user and production disables sign-in |

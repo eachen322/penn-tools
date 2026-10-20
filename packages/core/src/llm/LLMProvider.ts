@@ -1,5 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// LLMProvider interface
+// LLMProvider interface (legacy)
+//
+// Deprecated: kept unchanged for existing tools until they migrate. New tools
+// use the AI API (@penntools/core/ai). Delete this module once no tool uses it.
 //
 // All LLM interactions go through this interface. Adapters (OpenAI, Anthropic,
 // local) implement it in @penntools/platform.  Tools and chat routes import

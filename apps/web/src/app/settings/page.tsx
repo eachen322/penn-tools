@@ -43,7 +43,8 @@ export default async function SettingsPage() {
       <section className={cardPage.card}>
         <h2 className={styles.heading}>API keys</h2>
         <p className={cardPage.muted}>
-          Save your own OpenAI and Anthropic API keys. AskPenn and tools will start using them in an upcoming update.
+          Save your own OpenAI and Anthropic API keys. Newer tools run on your keys; AskPenn chat and older tools will
+          switch to them in a later update.
         </p>
         <ApiKeys saved={savedKeys} />
         <p className={cardPage.muted}>After you save a key, only its last four characters are shown.</p>

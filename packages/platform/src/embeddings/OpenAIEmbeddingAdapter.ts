@@ -1,12 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // OpenAI embedding adapter
 //
-// Uses text-embedding-3-small (1536 dimensions) unless another model is
+// Uses the platform's EMBEDDING_MODEL (@penntools/core/ai) unless another model is
 // passed.  Instantiated by the container when OPENAI_API_KEY is set.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import OpenAI from "openai";
 import type { EmbeddingProvider } from "@penntools/core/embeddings";
+import { EMBEDDING_MODEL } from "@penntools/core/ai";
 
 export class OpenAIEmbeddingAdapter implements EmbeddingProvider {
   readonly providerName = "openai";
@@ -14,7 +15,7 @@ export class OpenAIEmbeddingAdapter implements EmbeddingProvider {
 
   private readonly client: OpenAI;
 
-  constructor(apiKey: string, model = "text-embedding-3-small") {
+  constructor(apiKey: string, model: string = EMBEDDING_MODEL) {
     this.client = new OpenAI({ apiKey });
     this.model = model;
   }

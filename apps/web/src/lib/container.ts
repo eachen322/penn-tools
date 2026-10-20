@@ -25,6 +25,9 @@ import {
   PrismaResourceRepository,
 } from "@penntools/platform/db";
 import type { UserApiKeyRepository } from "@penntools/core/repositories";
+import { createAI, createUserEmbeddings } from "@penntools/platform/ai";
+import { EMBEDDING_MODEL } from "@penntools/core/ai";
+import type { AI } from "@penntools/core/ai";
 import { OpenAIAdapter, AnthropicAdapter } from "@penntools/platform/llm";
 import { OpenAIEmbeddingAdapter } from "@penntools/platform/embeddings";
 import type { EmbeddingProvider } from "@penntools/core/embeddings";
@@ -74,8 +77,9 @@ export const repositories = {
   users: new PrismaUserRepository(prisma),
 };
 
-// Kept out of `repositories`, which tools receive as `context.db`: tool code
-// must never be able to read users' keys.
+// Kept out of `repositories`, which tools receive as `context.db`, so tools never
+// receive users' keys. Tool code must not import it either (see CLAUDE.md);
+// the AI API below reads keys on the tool's behalf.
 export const userApiKeys: UserApiKeyRepository = new PrismaUserApiKeyRepository(prisma);
 
 // ── Embedding provider ─────────────────────────────────────────────────────
@@ -98,8 +102,37 @@ if (!embeddingProvider) {
 
 export const resourceRepository: ResourceRepository = new PrismaResourceRepository(prisma);
 
-// ── LLM provider ──────────────────────────────────────────────────────────────
-// Reads OPENAI_API_KEY or ANTHROPIC_API_KEY from env.  Falls back to OpenAI.
+// ── AI API (new tools) ────────────────────────────────────────────────────────
+// Generation uses only the user's saved keys, never the platform's. Search-query
+// embeddings use the user's OpenAI key, or OPENAI_API_KEY when they have none
+// (logged as "embeddings.platform_key"). Tool routes reach these through
+// getAI / getEmbeddings in lib/ai.ts; tool execute() gets them on ToolContext.
+
+export function createUserAI(userId: UserId): AI {
+  return createAI({
+    getKey: (provider) => userApiKeys.get(userId, provider),
+    listProviders: async () => (await userApiKeys.list(userId)).map((key) => key.provider),
+    logger,
+  });
+}
+
+export async function createUserEmbeddingProvider(
+  userId: UserId,
+  toolId: string,
+): Promise<EmbeddingProvider | null> {
+  return createUserEmbeddings({
+    userKey: await userApiKeys.get(userId, "openai"),
+    platformKey: process.env["OPENAI_API_KEY"] || null,
+    model: EMBEDDING_MODEL,
+    logger,
+    logFields: { userId, toolId },
+  });
+}
+
+// ── LLM provider (legacy) ─────────────────────────────────────────────────────
+// For existing tools only (context.llm, /api/llm/complete); new tools use the
+// AI API above. Reads OPENAI_API_KEY or ANTHROPIC_API_KEY from env.  Falls back
+// to OpenAI.
 
 function createLLMProvider(): LLMProvider {
   if (process.env["ANTHROPIC_API_KEY"]) {
@@ -172,6 +205,8 @@ export const toolRunner = new ToolRunner({
       currentUser: user,
       db: repositories,
       llm,
+      ai: createUserAI(userId),
+      embeddings: await createUserEmbeddingProvider(userId, toolId),
       analytics,
       logger,
       config: { toolId },

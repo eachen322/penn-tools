@@ -17,6 +17,8 @@ import type { MessageRepository } from "../repositories/MessageRepository.js";
 import type { ToolDataRepository } from "../repositories/ToolDataRepository.js";
 import type { UserRepository } from "../repositories/UserRepository.js";
 import type { LLMProvider } from "../llm/LLMProvider.js";
+import type { AI } from "../ai/types.js";
+import type { EmbeddingProvider } from "../embeddings/EmbeddingProvider.js";
 import type { Analytics } from "../analytics/Analytics.js";
 import type { UserId, User } from "../types/index.js";
 
@@ -62,8 +64,20 @@ export interface ToolContext {
     users: UserRepository;
   };
 
-  /** LLM orchestration — tools call this, not a vendor SDK directly. */
+  /**
+   * Legacy LLM API, for existing tools: calls the platform's key, or a key the
+   * browser sent. New tools use `ai`.
+   */
   llm: LLMProvider;
+
+  /** AI API: generates with the current user's saved keys (see @penntools/core/ai). */
+  ai: AI;
+
+  /**
+   * Embeddings for search queries: the user's OpenAI key, else the platform's.
+   * Null when neither exists.
+   */
+  embeddings: EmbeddingProvider | null;
 
   /** Analytics event emission. */
   analytics: Analytics;

@@ -27,7 +27,8 @@ Locally, you don't need Google credentials: without them, **Sign in** logs you i
 Copy `.env.example` to `apps/web/.env.local` (the setup script does this automatically) and fill in:
 
 ```bash
-# Required — at least one LLM provider
+# The platform's keys: OpenAI for embeddings and the legacy LLM API, Anthropic for
+# the legacy LLM API only. New tools generate with users' own keys from Settings.
 OPENAI_API_KEY=""
 ANTHROPIC_API_KEY=""
 
@@ -95,7 +96,7 @@ The database is Railway's pgvector Postgres template (the platform schema needs 
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | `${{pgvector.DATABASE_URL}}` — a reference to the database service |
-| `OPENAI_API_KEY` | Your OpenAI key (chat and semantic search; deploys also use it to embed Career Canvas's course catalog) |
+| `OPENAI_API_KEY` | The platform's OpenAI key: embeddings (deploys use it to embed Career Canvas's course catalog, and searches use it for users without their own OpenAI key) and the legacy LLM API. New tools generate with users' own keys from Settings |
 | `NEXT_PUBLIC_APP_URL` | The app's public URL; baked in at build time, so redeploy after changing it |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | The Google OAuth client (redirect URI `<public URL>/api/auth/callback/google`) |
 | `NEXTAUTH_SECRET` | Signs session cookies; generate with `openssl rand -base64 32` |

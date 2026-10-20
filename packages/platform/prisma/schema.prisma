@@ -48,10 +48,11 @@ model User {
 }
 
 /// A user's own LLM API key, entered on the settings page; at most one per
-/// provider. The key is stored in plain text, so it is never sent back to the
-/// browser or exposed to tools (see UserApiKeyRepository).
+/// provider, used by the AI API on the user's behalf. Stored in plain text, so
+/// it is never sent back to the browser, and tools never receive it and must
+/// not read it (see UserApiKeyRepository).
 model UserApiKey {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   userId    String         @map("user_id")
   provider  ApiKeyProvider
   secret    String
