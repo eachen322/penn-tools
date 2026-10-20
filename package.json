@@ -8,12 +8,15 @@
     "postinstall": "pnpm --filter @penntools/platform db:generate",
     "build": "turbo build",
     "lint": "turbo lint",
-    "test": "turbo test",
+    "test": "turbo test && node --test \"scripts/*.test.mjs\"",
     "typecheck": "turbo typecheck",
+    "check:tools": "node scripts/check-tool-imports.mjs",
     "clean": "turbo clean && rm -rf node_modules"
   },
   "pnpm": {
-    "neverBuiltDependencies": ["canvas"]
+    "neverBuiltDependencies": [
+      "canvas"
+    ]
   },
   "devDependencies": {
     "turbo": "^2.0.0",

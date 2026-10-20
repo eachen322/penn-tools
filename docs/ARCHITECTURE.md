@@ -186,6 +186,9 @@ section 4; this section covers the design.
   use the user's OpenAI key, or `OPENAI_API_KEY` when they haven't saved one;
   each platform-key call logs `embeddings.platform_key`, and its cost shows on
   that key in OpenAI's usage dashboard.
+- **Enforcement.** `pnpm check:tools` (`scripts/check-tool-imports.mjs`) fails
+  if tool code imports a vendor SDK, calls a provider API, or touches users'
+  keys or platform internals.
 
 ---
 
@@ -256,8 +259,8 @@ Key design choices:
   before saving and never sent back to the browser; the page shows only the last
   four characters. The repository is `userApiKeys` in `container.ts`, kept out of
   `repositories` (which tools get as `context.db`), so tools never receive keys;
-  tool code must not import it either. The AI API reads keys on the tool's
-  behalf.
+  tool code must not import it either (enforced by `pnpm check:tools`). The AI
+  API reads keys on the tool's behalf.
 - Tools that need real tables (queries across users, relations, search) get their
   own Postgres role and schema in the same database, never tables in `public`,
   which `prisma db push` manages and would drop. `db:deploy` (`prisma db push`,

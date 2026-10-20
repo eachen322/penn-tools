@@ -70,6 +70,7 @@ pnpm test                                     # run all tests
 pnpm build                                    # production build
 pnpm typecheck                                # TypeScript check
 pnpm lint                                     # ESLint
+pnpm check:tools                              # tool code follows the platform rules (no vendor SDKs or key access)
 
 pnpm --filter @penntools/platform db:deploy   # apply schema changes + tool databases
 ```

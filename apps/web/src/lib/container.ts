@@ -78,8 +78,8 @@ export const repositories = {
 };
 
 // Kept out of `repositories`, which tools receive as `context.db`, so tools never
-// receive users' keys. Tool code must not import it either (see CLAUDE.md);
-// the AI API below reads keys on the tool's behalf.
+// receive users' keys. Tool code must not import it either (CLAUDE.md, and
+// `pnpm check:tools`); the AI API below reads keys on the tool's behalf.
 export const userApiKeys: UserApiKeyRepository = new PrismaUserApiKeyRepository(prisma);
 
 // ── Embedding provider ─────────────────────────────────────────────────────
