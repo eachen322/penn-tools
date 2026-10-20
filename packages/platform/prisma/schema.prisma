@@ -39,8 +39,6 @@ model User {
   /// UPenn identifier (pennid / eppn), reserved for Penn SSO.
   pennId    String?  @unique @map("penn_id")
 
-  chats     Chat[]
-  messages  Message[]
   toolData  ToolData[]
   apiKeys   UserApiKey[]
 
@@ -72,47 +70,6 @@ enum ApiKeyProvider {
   ANTHROPIC
 }
 
-// ── Chats ─────────────────────────────────────────────────────────────────────
-
-model Chat {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  title     String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages Message[]
-
-  @@index([userId])
-  @@map("chats")
-}
-
-// ── Messages ──────────────────────────────────────────────────────────────────
-
-model Message {
-  id        String      @id @default(uuid())
-  chatId    String      @map("chat_id")
-  userId    String      @map("user_id")
-  role      MessageRole
-  content   String      @db.Text
-  /// Null for user/assistant messages; set to the tool id for tool messages.
-  toolId    String?     @map("tool_id")
-  createdAt DateTime    @default(now()) @map("created_at")
-
-  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([chatId])
-  @@map("messages")
-}
-
-enum MessageRole {
-  USER
-  ASSISTANT
-  TOOL
-}
-
 // ── Tool data ─────────────────────────────────────────────────────────────────
 
 /// Generic key-value store scoped to (userId, toolId).
@@ -131,24 +88,4 @@ model ToolData {
   @@unique([userId, toolId, key])
   @@index([userId, toolId])
   @@map("tool_data")
-}
-
-// ── Resources ─────────────────────────────────────────────────────────────────
-
-/// Penn resources and AskPenn tool entries stored with vector embeddings for
-/// semantic retrieval.  The embedding column uses pgvector (vector(1536)) and
-/// is populated by the platform on upsert.  Raw SQL is required for the
-/// vector column because Prisma marks it as Unsupported.
-model Resource {
-  id        String   @id
-  title     String
-  url       String
-  /// Combined text used for embedding: title + description + intent + tags.
-  content   String   @db.Text
-  /// text-embedding-3-small produces 1536-dimensional vectors.
-  embedding Unsupported("vector(1536)")?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("resources")
 }

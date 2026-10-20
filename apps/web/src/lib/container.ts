@@ -17,12 +17,9 @@ import "server-only"; // Next.js guard — this module cannot be bundled client-
 
 import {
   prisma,
-  PrismaChatRepository,
-  PrismaMessageRepository,
   PrismaToolDataRepository,
   PrismaUserRepository,
   PrismaUserApiKeyRepository,
-  PrismaResourceRepository,
 } from "@penntools/platform/db";
 import type { UserApiKeyRepository } from "@penntools/core/repositories";
 import { createAI, createUserEmbeddings } from "@penntools/platform/ai";
@@ -31,7 +28,6 @@ import type { AI } from "@penntools/core/ai";
 import { OpenAIAdapter, AnthropicAdapter } from "@penntools/platform/llm";
 import { OpenAIEmbeddingAdapter } from "@penntools/platform/embeddings";
 import type { EmbeddingProvider } from "@penntools/core/embeddings";
-import type { ResourceRepository } from "@penntools/core/resources";
 import { PostHogAnalytics } from "@penntools/platform/analytics";
 import { NoopAnalytics } from "@penntools/core/analytics";
 import { toolRegistry, ToolRunner } from "@penntools/core/tools";
@@ -59,10 +55,8 @@ import { AiCompassTool } from "@penntools/tool-ai-compass";
 toolRegistry.register(new AiCompassTool());
 import { PitchCoachTool } from "@penntools/tool-pitch-coach";
 toolRegistry.register(new PitchCoachTool());
-// ── Resource seeding (fire-and-forget) ────────────────────────────────────────
-// Imported lazily to avoid a circular reference with the logger defined below.
-import { seedResources } from "./seedResources";
-
+import { AskPennTool } from "@penntools/tool-askpenn";
+toolRegistry.register(new AskPennTool());
 // ── Repositories ──────────────────────────────────────────────────────────────
 // Postgres is required, locally too (see README for the Docker setup).
 
@@ -71,8 +65,6 @@ if (!process.env["DATABASE_URL"]) {
 }
 
 export const repositories = {
-  chats: new PrismaChatRepository(prisma),
-  messages: new PrismaMessageRepository(prisma),
   toolData: new PrismaToolDataRepository(prisma),
   users: new PrismaUserRepository(prisma),
 };
@@ -83,9 +75,8 @@ export const repositories = {
 export const userApiKeys: UserApiKeyRepository = new PrismaUserApiKeyRepository(prisma);
 
 // ── Embedding provider ─────────────────────────────────────────────────────
-// Only OpenAI provides an embeddings API we currently support.
-// If OPENAI_API_KEY is absent, embeddingProvider is null and RAG falls back
-// to returning a capped list of all stored resources.
+// The platform's OpenAI key, for tools that embed with it directly (Career
+// Canvas). Null when OPENAI_API_KEY is absent; tools then skip semantic search.
 
 export const embeddingProvider: EmbeddingProvider | null =
   process.env["OPENAI_API_KEY"]
@@ -94,13 +85,9 @@ export const embeddingProvider: EmbeddingProvider | null =
 
 if (!embeddingProvider) {
   console.warn(
-    "[PennTools] OPENAI_API_KEY not set — semantic resource search disabled. Resources will not be embedded."
+    "[PennTools] OPENAI_API_KEY not set — the platform's embeddings are disabled."
   );
 }
-
-// ── Resource repository ────────────────────────────────────────────────────
-
-export const resourceRepository: ResourceRepository = new PrismaResourceRepository(prisma);
 
 // ── AI API (new tools) ────────────────────────────────────────────────────────
 // Generation uses only the user's saved keys, never the platform's. Search-query
@@ -184,14 +171,6 @@ export const logger = {
   error: (msg: string, error?: unknown) =>
     console.error(JSON.stringify({ level: "error", msg, error: String(error) })),
 };
-
-// ── Seed resources on startup (fire-and-forget) ────────────────────────────────
-// TODO: Uncomment once pgvector is provisioned and OPENAI_API_KEY is set.
-// if (embeddingProvider) {
-//   seedResources(embeddingProvider, resourceRepository, logger).catch((err) =>
-//     logger.error("[container] seedResources unexpectedly threw", err)
-//   );
-// }
 
 // ── ToolRunner ────────────────────────────────────────────────────────────────
 

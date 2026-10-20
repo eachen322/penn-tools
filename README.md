@@ -1,6 +1,6 @@
 # PennTools
 
-AI-powered tools for the Penn community. Built on a Next.js monorepo with a chat interface (AskPenn) that surfaces tools by name and links to full-page tool UIs.
+AI-powered tools for the Penn community, built as a Next.js monorepo. Each tool has its own page at `/tools/<id>`, including AskPenn, the chat assistant (`/tools/askpenn`).
 
 ## Quick start
 

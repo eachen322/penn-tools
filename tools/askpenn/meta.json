@@ -1,0 +1,9 @@
+{
+  "name": "AskPenn",
+  "description": "Chat with an AI assistant for Penn students and staff, using your own OpenAI or Anthropic API key.",
+  "category": "General",
+  "builders": ["Platform team"],
+  "version": "0.0.1",
+  "inceptionDate": "2026-10-20",
+  "latestReleaseDate": "2026-10-20"
+}

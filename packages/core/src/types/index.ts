@@ -36,35 +36,6 @@ export interface SavedApiKey {
   updatedAt: Date;
 }
 
-// ── Chat ────────────────────────────────────────────────────────────────────
-
-export type ChatId = string;
-
-export interface Chat {
-  id: ChatId;
-  userId: UserId;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ── Message ─────────────────────────────────────────────────────────────────
-
-export type MessageId = string;
-
-export type MessageRole = "user" | "assistant" | "tool";
-
-export interface Message {
-  id: MessageId;
-  chatId: ChatId;
-  userId: UserId;
-  role: MessageRole;
-  content: string;
-  /** Set when role === 'tool'; identifies which tool produced the message. */
-  toolId: string | null;
-  createdAt: Date;
-}
-
 // ── Tool data ────────────────────────────────────────────────────────────────
 
 export type ToolDataId = string;

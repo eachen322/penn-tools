@@ -12,8 +12,6 @@
 //   tools/*  ✗  fetch / db / prisma   (never)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { ChatRepository } from "../repositories/ChatRepository.js";
-import type { MessageRepository } from "../repositories/MessageRepository.js";
 import type { ToolDataRepository } from "../repositories/ToolDataRepository.js";
 import type { UserRepository } from "../repositories/UserRepository.js";
 import type { LLMProvider } from "../llm/LLMProvider.js";
@@ -58,8 +56,6 @@ export interface ToolContext {
 
   /** Repositories — tools interact with the DB through these interfaces only. */
   db: {
-    chats: ChatRepository;
-    messages: MessageRepository;
     toolData: ToolDataRepository;
     users: UserRepository;
   };

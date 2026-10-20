@@ -9,4 +9,3 @@ export * from "./ai/index.js";
 export * from "./analytics/index.js";
 export * from "./repositories/index.js";
 export * from "./embeddings/index.js";
-export * from "./resources/index.js";

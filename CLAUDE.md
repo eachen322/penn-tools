@@ -16,7 +16,7 @@ Only proceed with any file edits after the team is confirmed. This includes chan
 ### Platform Team
 Full repository access. You may edit any file across:
 - `CLAUDE.md` — agent instruction file; only the Platform team may modify it
-- `apps/` — AskPenn web app and API routes
+- `apps/` — the web app and platform API routes
 - `packages/` — `core` interfaces, `platform` implementations
 - `scripts/` — tooling scripts
 - `tools/platform-playground/` — Platform team's own tool implementation
@@ -95,12 +95,12 @@ Get the logged-in user's name and ID.
 #### AI API
 Generate text, streams or structured data (typed objects checked against a Zod schema) with OpenAI or Anthropic, using the signed-in user's own API key from Settings. The tool picks the provider on every call, plus a model tier (`fast`, `standard`, `best`) and reasoning level; the platform sets the models and defaults in `packages/core/src/ai/models.ts`. The tool never sees the key: if the user hasn't saved one for that provider, the call fails with `AIError("missing_key")`. The platform's own keys are never used for generation.
 
-> **Usage:** Ask your coding agent: `Implement AI API following CLAUDE.md section 4.`
+> **Usage:** Ask your coding agent: `Implement AI API and refer to the AskPenn (tools/askpenn) implementation for guidance.`
 
 #### Embeddings API
 Turn text into vectors for semantic search, stored with pgvector in the tool's own tables. Requires the Database API. Always OpenAI, with the model set by the platform; tools can't choose another.
 
-> **Usage:** Ask your coding agent: `Implement Embeddings API and refer to the Career Canvas (tool 8) implementation for guidance.` Routes or server actions get an `EmbeddingProvider` from `getEmbeddings("<tool id>")` in `@/lib/ai` (in `execute()`, `context.embeddings`): it embeds with the user's OpenAI key, or the platform's when they have none, and is `null` when signed out or no key exists. Career Canvas shows storing and searching vectors; it predates `getEmbeddings` and still uses the container's `embeddingProvider`, which new tools don't use.
+> **Usage:** Ask your coding agent: `Implement Embeddings API and refer to the Career Canvas (tool 8) implementation for guidance.` Routes or server actions get an `EmbeddingProvider` from `getEmbeddings("<tool id>")` in `@/lib/ai`: it embeds with the user's OpenAI key, or the platform's when they have none, and is `null` when signed out or no key exists. Career Canvas shows storing and searching vectors; it predates `getEmbeddings` and still uses the container's `embeddingProvider`, which new tools don't use.
 
 #### Database API
 Tables of the tool's own, in a Postgres schema that only the tool can access (see **Tool database isolation** in section 5).
@@ -113,20 +113,22 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 ### How to add an API integration
 
 1. **Read the reference first.** Before writing any code, read the corresponding usage in:
-   - `packages/core/src/ai/types.ts` and `AIError.ts` — the AI API: `generate`, `stream`, `generateObject` with a Zod schema, `providers`, and the error kinds
+   - `tools/askpenn/src/conversation.ts` — AI API usage in the tool's logic: a streamed reply with the user's key, saved with the tool's own database
+   - `apps/web/src/app/tools/askpenn/` — `page.tsx` (checks sign-in and saved keys), `stream/route.ts` (streams replies to the page), `AskPenn.tsx` (reads the stream, shows errors, lets the user pick the provider, speed and thinking effort)
+   - `packages/core/src/ai/types.ts` and `AIError.ts` — the full AI API, including `generateObject` with a Zod schema, and the error kinds
    - `apps/web/src/lib/ai.ts` — `getAI()` and `getEmbeddings()` for the tool's routes and server actions
    - `tools/platform-playground/src/PlatformPlaygroundTool.ts` — backend usage of `context.currentUser` (and the legacy `context.llm`)
    - `apps/web/src/app/tools/platform-playground/page.tsx` — frontend patterns for calling `GET /api/me` (User API)
 
 2. **Backend (tool logic)** — Edit only `tools/{id}/src/`:
    - For **User API**: access the logged-in user via `context.currentUser` (returns name and ID)
-   - For **AI API**: take an `AI` (type from `@penntools/core/ai`) as a parameter from the tool's route or server action, or use `context.ai` in `execute()`. Name the `provider` on every call. When the tool needs JSON, use `generateObject` with a Zod schema rather than parsing model text; import `z` from `@penntools/core/ai` (never install `zod` separately), and mark fields that may be missing `.nullable()`, not `.optional()`
+   - For **AI API**: take an `AI` (type from `@penntools/core/ai`) as a parameter from the tool's route or server action. Name the `provider` on every call. When the tool needs JSON, use `generateObject` with a Zod schema rather than parsing model text; import `z` from `@penntools/core/ai` (never install `zod` separately), and mark fields that may be missing `.nullable()`, not `.optional()`
    - Import types from `@penntools/core` only — never from `@penntools/platform`
    - Never use `process.env`, `fetch` to external services, or vendor SDKs directly
 
 3. **Frontend and the tool's server code** — Edit only `apps/web/src/app/tools/{id}/`:
    - For **User API**: call `GET /api/me` to get the logged-in user's name and ID (it returns `401` when signed out). In the tool's own routes and server actions, call `getCurrentUser()` from `@/lib/auth` (null when signed out; respond with `signInRequired()`) — never create your own user IDs or identity cookies
-   - For **AI API**: call it only from server code: `getAI()` from `@/lib/ai` in the tool's routes and server actions (null when signed out). The page calls the tool's own server actions; prompts never come from or go to the browser as API calls. Return an `AIError` as data (`error.toJSON()`), since thrown errors lose their class across a server action. Server actions can't stream, so to show text as it's written, add a route in the tool's folder that sends `ai.stream()` events to the page. To let users pick a provider, return `ai.providers()` from a server action; when an error's kind is `missing_key`, `invalid_key` or `no_credit`, point users to Settings
+   - For **AI API**: call it only from server code: `getAI()` from `@/lib/ai` in the tool's routes and server actions (null when signed out). The page calls the tool's own server actions; prompts never come from or go to the browser as API calls. Return an `AIError` as data (`error.toJSON()`), since thrown errors lose their class across a server action. Server actions can't stream, so to show text as it's written, add a route in the tool's folder that sends `ai.stream()` events to the page, like AskPenn's `stream/route.ts`. To let users pick a provider, return `ai.providers()` from a server action; when an error's kind is `missing_key`, `invalid_key` or `no_credit`, point users to Settings
    - Mirror the patterns in the Platform Playground's `page.tsx`
 
 4. **Verify** after changes:

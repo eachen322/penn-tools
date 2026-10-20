@@ -22,7 +22,7 @@
 │   ├─ AI API types, model catalog, AIError, z (Zod)       │
 │   ├─ EmbeddingProvider, legacy LLMProvider interfaces    │
 │   ├─ Analytics interface                                 │
-│   └─ Repository interfaces (Chat, Message, ToolData…)   │
+│   └─ Repository interfaces (User, ToolData, UserApiKey) │
 ├──────────────────────────────────────────────────────────┤
 │  tools/<tool_id>  (one folder per tool)                  │
 │   ├─ extend Tool, implement execute(input, context)      │
@@ -51,30 +51,23 @@ type that parameter.
 
 ### Tools as mini-websites
 
-Every tool is a first-class feature with its own UI page, not just a backend function.
-Tools are discoverable through AskPenn (the chat interface) and navigable directly via URL.
-
-```
-AskPenn chat
-  └─ surfaces tool via name/description match
-  └─ links to /tools/[tool-id]
-       └─ full-page tool UI, rendered inside apps/web shell
-```
+Every tool is a first-class feature with its own UI page at `/tools/[tool-id]`, not
+just a backend function. AskPenn, the chat assistant, is a tool like any other
+(`tools/askpenn`, at `/tools/askpenn`).
 
 Each tool ships with:
 - **Backend logic** — the `Tool` class in `tools/<tool-id>/` (pure `core`-only, no UI)
 - **UI page** — a Next.js page at `apps/web/src/app/tools/[tool-id]/page.tsx`
 - **UI components** — co-located under `apps/web/src/app/tools/[tool-id]/`
 
-The tool `manifest` (defined in the `Tool` class) is the single source of truth for both
-AskPenn discovery and the `/tools` directory page:
+The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
+tool's name and description, shown by the tool pages' info button (`/api/tools`):
 
 ```ts
 manifest = {
   id: "course-finder",
   name: "Course Finder",
   description: "Find Penn courses by topic, requirement, or instructor.",
-  // AskPenn uses `description` to match user intent and surface this tool
 }
 ```
 
@@ -94,15 +87,6 @@ apps/web/src/app/
       page.tsx            ← /tools/course-finder  →  tool's full UI
       components/         ← tool-specific React components (optional)
 ```
-
-### How AskPenn surfaces tools
-
-AskPenn includes serialised tool manifests in its system prompt (same v2 mechanism as
-tool invocation). When a user's message matches a tool's purpose, AskPenn replies with
-a link and/or a brief description, directing the user to `/tools/[tool-id]`.
-
-Tools can also be invoked inline from chat (returning structured output); the UI page
-is the richer, stateful version of that same experience.
 
 ### Adding a new tool
 
@@ -131,25 +115,10 @@ if (!toolRegistry.get("course-finder")) {
 
 `ToolRunner.run(toolId, input, userId)` looks up the tool, checks `canAccess()`,
 builds a `ToolContext` (injecting db, llm, ai, embeddings, analytics, logger,
-config), and
-calls `tool.execute(input, context)`.
-
-### Tool invocation routing (v1)
-
-User sends a message like:
-```
-/tool course-finder { "query": "ML for non-majors" }
-```
-
-The `/api/chat/send` route detects the `/tool` prefix, parses the id and JSON
-input, and calls `ToolRunner.run()`.  For all other messages it calls the LLM
-directly.
-
-**v2 upgrade**: Replace the prefix check with a model-based tool-selection step:
-1. Call LLM with the message + serialised tool manifests in the system prompt.
-2. Parse the model's `tool_call` output.
-3. Run the selected tool, append a `tool` role message.
-4. Call LLM again with the tool output for a final synthesised reply.
+config), and calls `tool.execute(input, context)`. Nothing in the app calls it
+since AskPenn's `/tool` chat command was removed: tools do their work from their
+own pages, routes and server actions, and `execute()`, `ToolContext` and
+`ToolRunner` are due to be removed.
 
 ---
 
@@ -226,7 +195,7 @@ tool pages. It is a server component that calls `getCurrentUser()`:
   signs out and stays on the page.
 
 Pages that need a user render `SignInPrompt` for signed-out visitors instead of
-their content (`/ask` and `/settings` do). Because `getCurrentUser()` reads the
+their content (`/settings` and AskPenn do). Because `getCurrentUser()` reads the
 request's cookies, every page renders per request rather than being prerendered;
 it is cached per request, so the header and the page share one user lookup.
 
@@ -276,7 +245,6 @@ Key design choices:
   with the model that made it; searches compare only the current model's
   vectors, and the seed re-embeds the rest. Career Canvas (tool 8, schema
   `careercanvas`) is the reference.
-- `messages.tool_id` is nullable — set only when `role = TOOL`.
 - Tool metadata is not stored in the database; the registry in code is the
   source of truth.
 
