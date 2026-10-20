@@ -83,7 +83,7 @@ After scaffolding, remind the team to:
 
 ## 4. Adding Platform APIs to a Tool
 
-When a tool team asks to use a platform API (AI, database, analytics, etc.), follow the reference named for each API below. Do **not** modify any files outside the tool's scope — the User, AI and Embeddings APIs are already available through `ToolContext` and `@/lib/ai`, and the tool's own routes pass the Database API into its functions.
+When a tool team asks to use a platform API (AI, database, analytics, etc.), follow the reference named for each API below. Do **not** modify any files outside the tool's scope — the User, AI and Embeddings APIs are already available through `@/lib/auth` and `@/lib/ai`, and the tool's own routes pass the Database API into its functions.
 
 ### Available APIs
 
@@ -95,12 +95,12 @@ Get the logged-in user's name and ID.
 #### AI API
 Generate text, streams or structured data (typed objects checked against a Zod schema) with OpenAI or Anthropic, using the signed-in user's own API key from Settings. The tool picks the provider on every call, plus a model tier (`fast`, `standard`, `best`) and reasoning level; the platform sets the models and defaults in `packages/core/src/ai/models.ts`. The tool never sees the key: if the user hasn't saved one for that provider, the call fails with `AIError("missing_key")`. The platform's own keys are never used for generation.
 
-> **Usage:** Ask your coding agent: `Implement AI API and refer to the AskPenn (tools/askpenn) implementation for guidance.`
+> **Usage:** Ask your coding agent: `Implement AI API and refer to the platform playground implementation for guidance.` The Platform Playground shows single replies and structured output; for streaming and chat history, refer to the AskPenn (tools/askpenn) implementation instead.
 
 #### Embeddings API
-Turn text into vectors for semantic search, stored with pgvector in the tool's own tables. Requires the Database API. Always OpenAI, with the model set by the platform; tools can't choose another.
+Turn text into vectors for semantic search. To search more than a handful of documents, embed them once and store the vectors with pgvector in the tool's own tables, which requires the Database API. Always OpenAI, with the model set by the platform; tools can't choose another.
 
-> **Usage:** Ask your coding agent: `Implement Embeddings API and refer to the Career Canvas (tool 8) implementation for guidance.` Routes or server actions get an `EmbeddingProvider` from `getEmbeddings("<tool id>")` in `@/lib/ai`: it embeds with the user's OpenAI key, or the platform's when they have none, and is `null` when signed out or no key exists. Career Canvas shows storing and searching vectors; it predates `getEmbeddings` and still uses the container's `embeddingProvider`, which new tools don't use.
+> **Usage:** Ask your coding agent: `Implement Embeddings API and refer to the platform playground implementation for guidance.` Routes or server actions get an `EmbeddingProvider` from `getEmbeddings("<tool id>")` in `@/lib/ai`: it embeds with the user's OpenAI key, or the platform's when they have none, and is `null` when signed out or no key exists. The Playground shows getting and using it; Career Canvas (tool 8) shows storing and searching vectors in the tool's tables, but predates `getEmbeddings` and still uses the container's `embeddingProvider`, which new tools don't use.
 
 #### Database API
 Tables of the tool's own, in a Postgres schema that only the tool can access (see **Tool database isolation** in section 5).
@@ -112,24 +112,31 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 
 ### How to add an API integration
 
-1. **Read the reference first.** Before writing any code, read the corresponding usage in:
-   - `tools/askpenn/src/conversation.ts` — AI API usage in the tool's logic: a streamed reply with the user's key, saved with the tool's own database
-   - `apps/web/src/app/tools/askpenn/` — `page.tsx` (checks sign-in and saved keys), `stream/route.ts` (streams replies to the page), `AskPenn.tsx` (reads the stream, shows errors, lets the user pick the provider, speed and thinking effort)
-   - `packages/core/src/ai/types.ts` and `AIError.ts` — the full AI API, including `generateObject` with a Zod schema, and the error kinds
+1. **Read the reference first.** Before writing any code, read the corresponding usage in one of the two reference tools.
+
+   The Platform Playground (`/tools/platform-playground`) covers single replies, structured output, embeddings, the User API and tests:
+   - `tools/platform-playground/src/demos.ts` — the tool's logic: `ai.generate()`, `ai.generateObject()` with a Zod schema, and semantic search with an `EmbeddingProvider`
+   - `tools/platform-playground/src/__tests__/demos.test.ts` — testing that logic with fake AI and Embeddings APIs: no keys, no network, no cost
+   - `apps/web/src/app/tools/platform-playground/` — `page.tsx` (checks sign-in and saved keys), `actions.ts` (server actions that get the APIs, check input and return errors as data), `Playground.tsx` (calls them, shows errors, lets the user pick the provider, and calls `GET /api/me`)
+
+   AskPenn (`/tools/askpenn`) covers streaming, chat history and the tool's own database:
+   - `tools/askpenn/src/conversation.ts` — a streamed reply with the user's key, saved with the tool's own database
+   - `apps/web/src/app/tools/askpenn/` — `stream/route.ts` (streams replies to the page), `AskPenn.tsx` (reads the stream, lets the user pick the provider, speed and thinking effort)
+
+   And the APIs themselves:
+   - `packages/core/src/ai/types.ts` and `AIError.ts` — the full AI API and the error kinds
    - `apps/web/src/lib/ai.ts` — `getAI()` and `getEmbeddings()` for the tool's routes and server actions
-   - `tools/platform-playground/src/PlatformPlaygroundTool.ts` — backend usage of `context.currentUser` (and the legacy `context.llm`)
-   - `apps/web/src/app/tools/platform-playground/page.tsx` — frontend patterns for calling `GET /api/me` (User API)
 
 2. **Backend (tool logic)** — Edit only `tools/{id}/src/`:
-   - For **User API**: access the logged-in user via `context.currentUser` (returns name and ID)
+   - For **User API**: take the user's ID as a parameter from the tool's route or server action, as AskPenn's `chats.ts` does
    - For **AI API**: take an `AI` (type from `@penntools/core/ai`) as a parameter from the tool's route or server action. Name the `provider` on every call. When the tool needs JSON, use `generateObject` with a Zod schema rather than parsing model text; import `z` from `@penntools/core/ai` (never install `zod` separately), and mark fields that may be missing `.nullable()`, not `.optional()`
    - Import types from `@penntools/core` only — never from `@penntools/platform`
    - Never use `process.env`, `fetch` to external services, or vendor SDKs directly
 
 3. **Frontend and the tool's server code** — Edit only `apps/web/src/app/tools/{id}/`:
    - For **User API**: call `GET /api/me` to get the logged-in user's name and ID (it returns `401` when signed out). In the tool's own routes and server actions, call `getCurrentUser()` from `@/lib/auth` (null when signed out; respond with `signInRequired()`) — never create your own user IDs or identity cookies
-   - For **AI API**: call it only from server code: `getAI()` from `@/lib/ai` in the tool's routes and server actions (null when signed out). The page calls the tool's own server actions; prompts never come from or go to the browser as API calls. Return an `AIError` as data (`error.toJSON()`), since thrown errors lose their class across a server action. Server actions can't stream, so to show text as it's written, add a route in the tool's folder that sends `ai.stream()` events to the page, like AskPenn's `stream/route.ts`. To let users pick a provider, return `ai.providers()` from a server action; when an error's kind is `missing_key`, `invalid_key` or `no_credit`, point users to Settings
-   - Mirror the patterns in the Platform Playground's `page.tsx`
+   - For **AI API**: call it only from server code: `getAI()` from `@/lib/ai` in the tool's routes and server actions (null when signed out). The page calls the tool's own server actions; prompts never come from or go to the browser as API calls. Return an `AIError` as data (`error.toJSON()`), since thrown errors lose their class across a server action. Server actions can't stream, so to show text as it's written, add a route in the tool's folder that sends `ai.stream()` events to the page, like AskPenn's `stream/route.ts`. To let users pick a provider, read `ai.providers()` in the tool's `page.tsx` (a server component) and pass the list to the page's client component; when an error's kind is `missing_key`, `invalid_key` or `no_credit`, point users to Settings
+   - Mirror the patterns in the Platform Playground's and AskPenn's folders
 
 4. **Verify** after changes:
    ```
@@ -141,7 +148,7 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 
 - **All changes must stay within the tool's two directories.** Only the APIs listed above are available. If a team needs something beyond these, explain that they should request it from the Platform team — do not add it yourself.
 - **Do not create routes under `apps/web/src/app/api/`.** Those are platform routes; only the Platform team creates them. A tool may add its own routes or server actions inside its landing page folder (`apps/web/src/app/tools/{id}/`), as Compass and Career Canvas do.
-- **Do not duplicate platform logic.** If the Platform Playground already demonstrates the pattern, adapt it — don't reinvent it.
+- **Do not duplicate platform logic.** If the Platform Playground or AskPenn already demonstrates the pattern, adapt it — don't reinvent it.
 - **New tools use the AI API, not the legacy LLM API.**
 - **Never read users' saved API keys, or use them for anyone but the signed-in user.** Keys are stored in plain text. Tool code must not import `userApiKeys`, `createUserAI` or `createUserEmbeddingProvider` from `@/lib/container`, or query the `user_api_keys` table; use `getAI` and `getEmbeddings`. `pnpm check:tools` enforces this, along with no vendor SDKs, no direct provider API calls and no platform imports besides `toolSql`.
 

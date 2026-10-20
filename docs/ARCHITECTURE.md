@@ -55,6 +55,11 @@ Every tool is a first-class feature with its own UI page at `/tools/[tool-id]`, 
 just a backend function. AskPenn, the chat assistant, is a tool like any other
 (`tools/askpenn`, at `/tools/askpenn`).
 
+AskPenn and the Platform Playground (`tools/platform-playground`) are the
+reference tools for new tool teams. AskPenn shows streaming, chat history and a
+tool's own database. The Playground shows single replies, structured output,
+embeddings, the User API and testing with fake APIs.
+
 Each tool ships with:
 - **Backend logic** — the `Tool` class in `tools/<tool-id>/` (pure `core`-only, no UI)
 - **UI page** — a Next.js page at `apps/web/src/app/tools/[tool-id]/page.tsx`

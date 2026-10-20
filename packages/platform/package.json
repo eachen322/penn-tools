@@ -39,7 +39,7 @@
     "clean": "rm -rf dist",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:deploy": "node scripts/drop-retired-tables.mjs && prisma db push --skip-generate && node scripts/setup-tools.mjs"
+    "db:deploy": "prisma db push --skip-generate && node scripts/setup-tools.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
