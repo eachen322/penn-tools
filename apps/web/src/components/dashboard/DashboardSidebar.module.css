@@ -100,7 +100,6 @@
   color: var(--muted);
 }
 
-.badge,
 .pill {
   padding: 2px 7px;
   border-radius: 999px;
@@ -110,8 +109,6 @@
   font-weight: 800;
   letter-spacing: 0.1em;
 }
-
-.badge { margin-left: auto; }
 
 /* User row, pinned to the bottom like AskPenn's */
 .userRow {

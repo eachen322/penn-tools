@@ -56,6 +56,8 @@ TARGETS = {
     "ai-compass": {"url": f"{LOCAL}/tools/ai-compass"},
     "pitch-coach": {"url": f"{LOCAL}/tools/pitch-coach"},
     "platform-playground": {"url": f"{LOCAL}/tools/platform-playground"},
+    # AskPenn, shown under Platform
+    "askpenn": {"url": f"{LOCAL}/ask"},
 }
 
 

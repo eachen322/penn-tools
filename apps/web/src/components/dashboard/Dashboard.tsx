@@ -15,6 +15,7 @@ export interface DashboardTool {
   href: string;
   external: boolean;
   beta: boolean;
+  deprecated?: boolean;
   image?: string | undefined;
   /** Screenshot of the tool's homepage, from scripts/capture-tool-screenshots.py. */
   preview: string;
@@ -44,6 +45,20 @@ const COMMUNITY: DashboardTool[] = communityTools.map((t) => ({
   external: true,
   beta: false,
 }));
+
+/** AskPenn, the original chat assistant, kept under Platform while it's phased out. */
+const ASKPENN: DashboardTool = {
+  key: "internal-askpenn",
+  title: "AskPenn",
+  description: "The original PennTools chat assistant for questions about Penn resources and tools.",
+  category: "Platform",
+  builders: ["Ananya Chandra"],
+  href: "/ask",
+  preview: "/dashboard/askpenn.jpg",
+  external: false,
+  beta: false,
+  deprecated: true,
+};
 
 function fromManifest(m: ToolManifest): DashboardTool {
   const platform = PLATFORM_TOOL_IDS.has(m.id);
@@ -101,7 +116,7 @@ export function Dashboard() {
   }, []);
 
   const llmTools = internalTools.filter((t) => t.category === "LLM Tools");
-  const platformTools = internalTools.filter((t) => t.category === "Platform");
+  const platformTools = [...internalTools.filter((t) => t.category === "Platform"), ASKPENN];
 
   return (
     <div className={styles.shell}>
@@ -224,6 +239,7 @@ function ToolTile({ tool }: { tool: DashboardTool }) {
           <div className={styles.tileTitleWrap}>
             <h3 className={styles.tileTitle}>{tool.title}</h3>
             {tool.beta && <span className={styles.betaSticker}>BETA</span>}
+            {tool.deprecated && <span className={styles.deprecatedSticker}>DEPRECATED</span>}
           </div>
           {tool.external && (
             <svg className={styles.externalIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Opens in a new tab">

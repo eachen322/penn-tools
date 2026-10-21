@@ -33,14 +33,6 @@ function IconGrid() {
   );
 }
 
-function IconChat() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
 function IconSparkle() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -112,11 +104,6 @@ export function DashboardSidebar({
           <Link href="/" className={`${styles.item} ${styles.active}`} title="Dashboard">
             <IconGrid />
             <span className={styles.label}>Dashboard</span>
-          </Link>
-          <Link href="/ask" className={styles.item} title="AskPenn">
-            <IconChat />
-            <span className={styles.label}>AskPenn</span>
-            <span className={`${styles.badge} ${styles.label}`}>BETA</span>
           </Link>
         </nav>
 

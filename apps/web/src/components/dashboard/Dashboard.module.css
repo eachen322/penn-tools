@@ -216,7 +216,8 @@
 }
 .tile:hover .externalIcon { color: var(--penn-blue); }
 
-.betaSticker {
+.betaSticker,
+.deprecatedSticker {
   display: inline-flex;
   align-items: center;
   height: 1.2rem;
@@ -229,6 +230,10 @@
 .betaSticker {
   background: linear-gradient(180deg, #f5f3ef 0%, #ebe7df 100%);
   color: #667a90;
+}
+.deprecatedSticker {
+  background: #fdecec;
+  color: #a23b3b;
 }
 
 .tileDesc {
