@@ -79,10 +79,10 @@ export function Sidebar({ chats, activeChatId, onSelectChat, onNewChat, tools }:
           <IconSearch />
           <span>Search chats</span>
         </button>
-        <button className={styles.navItem} disabled>
+        <Link href="/" className={styles.toolItem}>
           <IconGrid />
           <span>Dashboard</span>
-        </button>
+        </Link>
       </nav>
 
       {/* Tools section */}

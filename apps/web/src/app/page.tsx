@@ -1,5 +1,8 @@
-// Root page — placeholder landing page for PennTools. AskPenn lives at /ask.
+// Root page — the PennTools dashboard of community and BETA LLM tools.
+// AskPenn lives at /ask.
+
+import { Dashboard } from "@/components/dashboard/Dashboard";
 
 export default function HomePage() {
-  return <h1>PennTools</h1>;
+  return <Dashboard />;
 }
