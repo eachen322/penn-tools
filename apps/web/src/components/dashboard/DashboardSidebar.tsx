@@ -9,7 +9,8 @@ interface DashboardSidebarProps {
   mobileOpen: boolean;
   onCloseMobile: () => void;
   categories: { name: string; count: number }[];
-  betaCount: number;
+  llmCount: number;
+  platformCount: number;
 }
 
 export function categoryAnchor(name: string): string {
@@ -48,13 +49,39 @@ function IconSparkle() {
   );
 }
 
+function Svg({ children }: { children: React.ReactNode }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </svg>
+  );
+}
+
+function CategoryIcon({ name }: { name: string }) {
+  switch (name) {
+    case "Recruiting":
+      return <Svg><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" /></Svg>;
+    case "Academics":
+      return <Svg><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c3 2 9 2 12 0v-5" /></Svg>;
+    case "Productivity":
+      return <Svg><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" /></Svg>;
+    default:
+      return <Svg><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></Svg>;
+  }
+}
+
+function IconPlatform() {
+  return <Svg><path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="m2 17 10 5 10-5M2 12l10 5 10-5" /></Svg>;
+}
+
 export function DashboardSidebar({
   collapsed,
   onToggle,
   mobileOpen,
   onCloseMobile,
   categories,
-  betaCount,
+  llmCount,
+  platformCount,
 }: DashboardSidebarProps) {
   const cls = [
     styles.sidebar,
@@ -97,18 +124,32 @@ export function DashboardSidebar({
           <p className={styles.sectionLabel}>Categories</p>
           {categories.map((c) => (
             <a key={c.name} href={`#${categoryAnchor(c.name)}`} className={styles.item} title={c.name}>
-              <span className={styles.dot} aria-hidden="true">{c.name.charAt(0)}</span>
+              <CategoryIcon name={c.name} />
               <span className={styles.label}>{c.name}</span>
               <span className={`${styles.count} ${styles.label}`}>{c.count}</span>
             </a>
           ))}
-          {betaCount > 0 && (
-            <a href="#beta" className={styles.item} title="BETA LLM Tools">
+          {llmCount > 0 && (
+            <a href="#llm-tools" className={styles.item} title="LLM Tools">
               <IconSparkle />
-              <span className={styles.label}>BETA LLM Tools</span>
-              <span className={`${styles.count} ${styles.label}`}>{betaCount}</span>
+              <span className={styles.label}>LLM Tools</span>
+              <span className={`${styles.pill} ${styles.label}`}>BETA</span>
+              <span className={`${styles.count} ${styles.label}`}>{llmCount}</span>
             </a>
           )}
+          {platformCount > 0 && (
+            <a href="#platform" className={styles.item} title="Platform">
+              <IconPlatform />
+              <span className={styles.label}>Platform</span>
+              <span className={`${styles.count} ${styles.label}`}>{platformCount}</span>
+            </a>
+          )}
+        </div>
+
+        {/* Bottom: user */}
+        <div className={styles.userRow} title="Anonymous">
+          <div className={styles.avatar}>A</div>
+          <span className={`${styles.userName} ${styles.label}`}>Anonymous</span>
         </div>
       </aside>
     </>

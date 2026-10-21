@@ -11,12 +11,12 @@ export interface CommunityTool {
   category: string;
   builder: string;
   url: string;
-  /** Extra search terms, such as the names of apps bundled under one link. */
+  /** Extra search terms beyond the title and description. */
   keywords?: string[];
 }
 
 /** Display order of categories on the dashboard. */
-export const CATEGORY_ORDER = ["Academics", "Recruiting", "Productivity"];
+export const CATEGORY_ORDER = ["Recruiting", "Academics", "Productivity"];
 
 export const communityTools: CommunityTool[] = [
   {
@@ -28,6 +28,15 @@ export const communityTools: CommunityTool[] = [
     builder: "Jiaqi Song",
     url: "https://quakercal.vercel.app/",
     keywords: ["calendar", "schedule", "classes", "courses", "enrollment", "ics"],
+  },
+  {
+    id: "roic-tree-generator",
+    title: "ROIC Tree Generator",
+    description: "Break down a company's return on invested capital (ROIC) into its component drivers.",
+    category: "Academics",
+    builder: "Itay Zitvar",
+    url: "https://roic-tree-generator.vercel.app/",
+    keywords: ["roic", "finance", "valuation", "corporate finance", "accounting", "driver tree"],
   },
   {
     id: "mba-tech-internships",
@@ -50,18 +59,22 @@ export const communityTools: CommunityTool[] = [
     keywords: ["product management", "pm", "interview", "frameworks", "case", "learning"],
   },
   {
-    id: "zitvar-apps",
-    title: "Zitvar.ai Apps",
-    description:
-      "A collection of apps: Defluffer, ROIC Tree Generator, Amtraker, ThankYouGPT and 1000Words.",
+    id: "defluffer",
+    title: "Defluffer",
+    description: "A browser extension that condenses verbose LinkedIn posts into a single line.",
     category: "Productivity",
     builder: "Itay Zitvar",
-    url: "https://www.zitvar.ai/",
-    keywords: [
-      "defluffer", "linkedin", "roic", "finance", "valuation", "amtraker", "amtrak",
-      "train", "fares", "thankyougpt", "thank you notes", "networking", "1000words",
-      "language learning",
-    ],
+    url: "https://itayzit.github.io/defluffer/",
+    keywords: ["linkedin", "extension", "summarize", "browser", "feed"],
+  },
+  {
+    id: "thankyougpt",
+    title: "ThankYouGPT",
+    description: "Thank-you emails, reach-outs and everything else you need for MBA networking.",
+    category: "Productivity",
+    builder: "Itay Zitvar, Jonathan Schwartz",
+    url: "https://thank-you-gpt.com",
+    keywords: ["thank you notes", "networking", "email", "recruiting", "coffee chat"],
   },
   {
     id: "stactab",
@@ -69,7 +82,7 @@ export const communityTools: CommunityTool[] = [
     description:
       "A Chrome extension that groups tabs by domain, sleeps inactive tabs, removes duplicates and archives sessions to a searchable vault.",
     category: "Productivity",
-    builder: "Manan",
+    builder: "Manan Sharma",
     url: "https://chromewebstore.google.com/detail/stactab/hdfcdcoogjkdogmnhhopkekanpldoefh",
     keywords: ["chrome", "extension", "tabs", "browser", "focus"],
   },

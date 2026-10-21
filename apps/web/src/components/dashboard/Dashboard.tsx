@@ -12,9 +12,14 @@ export interface DashboardTool extends SearchableTool {
   external: boolean;
   beta: boolean;
   image?: string | undefined;
+  /** Screenshot of the tool's homepage, from scripts/capture-tool-screenshots.py. */
+  preview: string;
 }
 
 const COLLAPSED_KEY = "penntools_sidebar_collapsed";
+
+/** Registered tools that exist to exercise the platform rather than for students. */
+const PLATFORM_TOOL_IDS = new Set(["platform-playground"]);
 
 function hostOf(url: string): string {
   try {
@@ -32,27 +37,30 @@ const COMMUNITY: DashboardTool[] = communityTools.map((t) => ({
   builders: [t.builder],
   keywords: t.keywords ?? [],
   href: t.url,
+  preview: `/dashboard/${t.id}.jpg`,
   external: true,
   beta: false,
 }));
 
 function fromManifest(m: ToolManifest): DashboardTool {
+  const platform = PLATFORM_TOOL_IDS.has(m.id);
   return {
-    key: `beta-${m.id}`,
+    key: `internal-${m.id}`,
     title: m.title,
     description: m.description,
-    category: "BETA LLM Tools",
+    category: platform ? "Platform" : "LLM Tools",
     builders: m.contributors,
-    keywords: ["beta", "llm", "ai"],
+    keywords: platform ? ["platform", "api", "test"] : ["beta", "llm", "ai"],
     href: `/tools/${m.id}`,
+    preview: `/dashboard/${m.id}.jpg`,
     external: false,
-    beta: true,
+    beta: !platform,
     image: m.image && m.image !== "Default" ? m.image : undefined,
   };
 }
 
 export function Dashboard() {
-  const [betaTools, setBetaTools] = useState<DashboardTool[]>([]);
+  const [internalTools, setInternalTools] = useState<DashboardTool[]>([]);
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -61,7 +69,7 @@ export function Dashboard() {
   useEffect(() => {
     fetch("/api/tools")
       .then((r) => r.json())
-      .then((manifests: ToolManifest[]) => setBetaTools(manifests.map(fromManifest)))
+      .then((manifests: ToolManifest[]) => setInternalTools(manifests.map(fromManifest)))
       .catch(() => {});
   }, []);
 
@@ -105,9 +113,12 @@ export function Dashboard() {
     }));
   }, []);
 
+  const llmTools = internalTools.filter((t) => t.category === "LLM Tools");
+  const platformTools = internalTools.filter((t) => t.category === "Platform");
+
   const results = useMemo(
-    () => searchTools([...COMMUNITY, ...betaTools], query),
-    [betaTools, query],
+    () => searchTools([...COMMUNITY, ...internalTools], query),
+    [internalTools, query],
   );
   const searching = query.trim().length > 0;
 
@@ -124,7 +135,8 @@ export function Dashboard() {
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
         categories={categories.map((c) => ({ name: c.name, count: c.tools.length }))}
-        betaCount={betaTools.length}
+        llmCount={llmTools.length}
+        platformCount={platformTools.length}
       />
 
       <main className={styles.main}>
@@ -220,17 +232,30 @@ export function Dashboard() {
                 </section>
               ))}
 
-              {betaTools.length > 0 && (
-                <section id="beta" className={`${styles.section} ${styles.betaSection}`}>
+              {llmTools.length > 0 && (
+                <section id="llm-tools" className={`${styles.section} ${styles.betaSection}`}>
                   <div className={styles.betaHeader}>
-                    <h2 className={styles.sectionLabel}>BETA LLM Tools</h2>
+                    <h2 className={`${styles.sectionLabel} ${styles.labelWithPill}`}>
+                      LLM Tools <span className={styles.betaSticker}>BETA</span>
+                    </h2>
                     <p className={styles.betaNote}>
                       LLM-powered tools built on the PennTools platform. Add your API key in{" "}
                       <a href="/ask">AskPenn</a> to use them.
                     </p>
                   </div>
                   <div className={styles.grid}>
-                    {betaTools.map((tool) => (
+                    {llmTools.map((tool) => (
+                      <ToolTile key={tool.key} tool={tool} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {platformTools.length > 0 && (
+                <section id="platform" className={styles.section}>
+                  <h2 className={styles.sectionLabel}>Platform</h2>
+                  <div className={styles.grid}>
+                    {platformTools.map((tool) => (
                       <ToolTile key={tool.key} tool={tool} />
                     ))}
                   </div>
@@ -245,6 +270,8 @@ export function Dashboard() {
 }
 
 function ToolTile({ tool, bestMatch = false }: { tool: DashboardTool; bestMatch?: boolean }) {
+  // Tools without a captured screenshot keep the plain tile.
+  const [hasPreview, setHasPreview] = useState(true);
   const external = tool.external
     ? { target: "_blank", rel: "noopener noreferrer" }
     : {};
@@ -255,31 +282,37 @@ function ToolTile({ tool, bestMatch = false }: { tool: DashboardTool; bestMatch?
       className={`${styles.tile} ${bestMatch ? styles.tileBest : ""}`}
       {...external}
     >
-      <div className={styles.tileHead}>
-        {tool.image ? (
-          <img src={tool.image} alt="" className={styles.tileIcon} />
-        ) : (
-          <span className={styles.tileMonogram} aria-hidden="true">
-            {tool.title.charAt(0)}
-          </span>
-        )}
-        <div className={styles.tileTitleWrap}>
-          <h3 className={styles.tileTitle}>{tool.title}</h3>
-          {tool.beta && <span className={styles.betaSticker}>BETA</span>}
-          {bestMatch && <span className={styles.bestSticker}>Best match</span>}
+      {hasPreview && (
+        <div className={styles.tilePreview}>
+          <img
+            src={tool.preview}
+            alt=""
+            loading="lazy"
+            onError={() => setHasPreview(false)}
+          />
         </div>
-        {tool.external && (
-          <svg className={styles.externalIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Opens in a new tab">
-            <path d="M7 17 17 7M8 7h9v9" />
-          </svg>
-        )}
-      </div>
-      <p className={styles.tileDesc}>{tool.description}</p>
-      <div className={styles.tileFoot}>
-        <span className={styles.tileBuilders}>{tool.builders.join(", ")}</span>
-        <span className={styles.tileMeta}>
-          {tool.external ? hostOf(tool.href) : "PennTools"}
-        </span>
+      )}
+      <div className={styles.tileBody}>
+        <div className={styles.tileHead}>
+          {tool.image && <img src={tool.image} alt="" className={styles.tileIcon} />}
+          <div className={styles.tileTitleWrap}>
+            <h3 className={styles.tileTitle}>{tool.title}</h3>
+            {tool.beta && <span className={styles.betaSticker}>BETA</span>}
+            {bestMatch && <span className={styles.bestSticker}>Best match</span>}
+          </div>
+          {tool.external && (
+            <svg className={styles.externalIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="Opens in a new tab">
+              <path d="M7 17 17 7M8 7h9v9" />
+            </svg>
+          )}
+        </div>
+        <p className={styles.tileDesc}>{tool.description}</p>
+        <div className={styles.tileFoot}>
+          <span className={styles.tileBuilders}>{tool.builders.join(", ")}</span>
+          <span className={styles.tileMeta}>
+            {tool.external ? hostOf(tool.href) : "PennTools"}
+          </span>
+        </div>
       </div>
     </a>
   );

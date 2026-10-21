@@ -39,18 +39,12 @@ export function AppShell() {
     }
   }
 
-  async function handleNewChat() {
-    const chatId = await startNewChat();
-    if (chatId) setActiveChatId(chatId);
-  }
-
   return (
     <div className={styles.shell}>
       <Sidebar
         chats={chats}
         activeChatId={activeChatId}
         onSelectChat={setActiveChatId}
-        onNewChat={handleNewChat}
         tools={tools}
       />
 

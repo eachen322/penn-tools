@@ -169,6 +169,12 @@
 }
 .betaHeader .sectionLabel { margin: 0; }
 
+.labelWithPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .betaNote {
   font-size: 0.85rem;
   color: var(--muted);
@@ -185,8 +191,7 @@
 .tile {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px;
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--bg);
@@ -201,6 +206,30 @@
 }
 .tile:focus-visible { outline: 2px solid var(--penn-blue); outline-offset: 2px; }
 
+.tilePreview {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+}
+.tilePreview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.3s ease;
+}
+.tile:hover .tilePreview img { transform: scale(1.03); }
+
+.tileBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+}
+
 .tileBest { border-color: var(--penn-blue); box-shadow: 0 0 0 1px var(--penn-blue); }
 
 .tileHead {
@@ -209,22 +238,12 @@
   gap: 12px;
 }
 
-.tileIcon,
-.tileMonogram {
+.tileIcon {
   width: 40px;
   height: 40px;
   border-radius: 10px;
   flex-shrink: 0;
-}
-.tileIcon { object-fit: cover; }
-.tileMonogram {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--penn-blue);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.1rem;
+  object-fit: cover;
 }
 
 .tileTitleWrap {
@@ -284,17 +303,14 @@
 .tileFoot {
   margin-top: auto;
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
   font-size: 0.78rem;
   color: var(--muted);
 }
 
-.tileBuilders {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.tileBuilders { line-height: 1.45; }
 
 .tileMeta { flex-shrink: 0; }
 

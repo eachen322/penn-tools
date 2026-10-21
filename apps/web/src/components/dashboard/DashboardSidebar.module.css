@@ -94,28 +94,14 @@
   text-overflow: ellipsis;
 }
 
-.dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 5px;
-  background: var(--penn-blue);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
 .count {
   margin-left: auto;
   font-size: 0.75rem;
   color: var(--muted);
 }
 
-.badge {
-  margin-left: auto;
+.badge,
+.pill {
   padding: 2px 7px;
   border-radius: 999px;
   background: linear-gradient(180deg, #f5f3ef 0%, #ebe7df 100%);
@@ -125,13 +111,45 @@
   letter-spacing: 0.1em;
 }
 
+.badge { margin-left: auto; }
+
+/* User row, pinned to the bottom like AskPenn's */
+.userRow {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.userRow:hover { background: var(--nav-hover); }
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #19c37d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.userName { font-size: 0.875rem; font-weight: 500; }
+
 /* Collapsed: icon rail */
 .collapsed { width: 60px; }
 .collapsed .header { flex-direction: column; }
 .collapsed .brand { padding: 6px; }
 .collapsed .label,
 .collapsed .sectionLabel { display: none; }
-.collapsed .item { justify-content: center; padding: 10px 0; }
+.collapsed .item,
+.collapsed .userRow { justify-content: center; padding: 10px 0; }
 .collapsed .section { border-top: 1px solid var(--border); margin-top: 4px; }
 
 .scrim { display: none; }
@@ -154,6 +172,7 @@
   .collapsed .label { display: inline; }
   .collapsed .sectionLabel { display: block; }
   .collapsed .item { justify-content: flex-start; padding: 9px 12px; }
+  .collapsed .userRow { justify-content: flex-start; padding: 10px 12px; }
   .collapsed .section { border-top: none; margin-top: 0; }
   .toggle { display: none; }
 

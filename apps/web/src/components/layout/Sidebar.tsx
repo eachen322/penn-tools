@@ -10,24 +10,7 @@ interface SidebarProps {
   chats: Chat[];
   activeChatId: string | null;
   onSelectChat: (id: string) => void;
-  onNewChat: () => void;
   tools: ToolManifest[];
-}
-
-function IconNewChat() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
-}
-
-function IconSearch() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-    </svg>
-  );
 }
 
 function IconChat() {
@@ -54,7 +37,7 @@ function IconGrid() {
   );
 }
 
-export function Sidebar({ chats, activeChatId, onSelectChat, onNewChat, tools }: SidebarProps) {
+export function Sidebar({ chats, activeChatId, onSelectChat, tools }: SidebarProps) {
   const [apiKey, setApiKey] = useState("");
 
   useEffect(() => {
@@ -69,19 +52,22 @@ export function Sidebar({ chats, activeChatId, onSelectChat, onNewChat, tools }:
 
   return (
     <aside className={styles.sidebar}>
-      {/* Top nav */}
+      {/* Header + top nav, matching the PennTools dashboard sidebar */}
+      <div className={styles.header}>
+        <Link href="/" className={styles.brand}>
+          <img src="/wharton-ai-club-logo.png" alt="" className={styles.logo} />
+          <span>PennTools</span>
+        </Link>
+      </div>
       <nav className={styles.topNav}>
-        <button className={styles.newChat} onClick={onNewChat} disabled>
-          <IconNewChat />
-          <span>New chat</span>
-        </button>
-        <button className={styles.navItem} disabled>
-          <IconSearch />
-          <span>Search chats</span>
-        </button>
         <Link href="/" className={styles.toolItem}>
           <IconGrid />
           <span>Dashboard</span>
+        </Link>
+        <Link href="/ask" className={`${styles.toolItem} ${styles.active}`}>
+          <IconChat />
+          <span>AskPenn</span>
+          <span className={styles.badge}>BETA</span>
         </Link>
       </nav>
 

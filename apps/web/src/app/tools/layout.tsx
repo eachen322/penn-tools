@@ -12,8 +12,8 @@ export default function ToolsLayout({ children }: { children: React.ReactNode })
   const isCareerCanvasLanding = pathname === "/tools/8";
   const isCareerCanvasSubPage = isCareerCanvas && !isCareerCanvasLanding;
 
-  const backHref = "/ask";
-  const backLabel = "← AskPenn";
+  const backHref = "/";
+  const backLabel = "← Dashboard";
 
   return (
     <div className={styles.container}>
