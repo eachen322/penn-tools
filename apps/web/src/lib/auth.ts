@@ -22,7 +22,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers/index";
 import type { User } from "@penntools/core/types";
-import { repositories, logger } from "./container";
+import { users, logger } from "./container";
 
 declare module "next-auth" {
   interface Session {
@@ -86,7 +86,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account }) {
       // `account` is only present on the sign-in request itself.
       if (account) {
-        const user = await repositories.users.upsertByGoogleAccount({
+        const user = await users.upsertByGoogleAccount({
           googleId: account.provider === "google" ? account.providerAccountId : DEV_GOOGLE_ID,
           email: token.email ?? null,
           name: token.name ?? null,
@@ -117,7 +117,7 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   if (!signInProvider) return null;
 
   const session = await getServerSession(authOptions);
-  return session?.userId ? repositories.users.findById(session.userId) : null;
+  return session?.userId ? users.findById(session.userId) : null;
 });
 
 /** Response for APIs called without a signed-in user. */

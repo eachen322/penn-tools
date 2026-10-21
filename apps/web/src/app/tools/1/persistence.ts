@@ -2,9 +2,9 @@
 // Records are accumulated across terms: uploading Spring2026 does not
 // remove Fall2025 data. The JSON file is the source of truth.
 //
-// NOTE: This is a local-dev solution. For production, the Platform team
-// should expose a ToolDataRepository API via ToolContext so records can
-// be stored in the shared Prisma database instead of the filesystem.
+// NOTE: This is a local-dev solution. For production, store the records in
+// the tool's own database tables (the Database API in CLAUDE.md) instead of
+// the filesystem.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";

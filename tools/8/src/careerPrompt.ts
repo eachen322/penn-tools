@@ -57,7 +57,7 @@ export function buildStudentPayload(input: Tool8Input): string {
   return parts.join("\n\n");
 }
 
-/** Message body for the LLM `user` role (tool execute path). */
+/** Message body for the LLM `user` role. */
 export function buildUserMessageForCareerCanvas(input: Tool8Input): string {
   const raw = input.prompt?.trim();
   if (raw) {

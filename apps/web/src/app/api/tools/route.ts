@@ -1,7 +1,5 @@
-// GET /api/tools — returns the manifests of all registered tools
-//
-// Safe to call from client components. Returns only the manifest (no
-// execute logic). Bootstrap is guaranteed by importing container.
+// GET /api/tools — returns the manifests of all registered tools, for the
+// info button on tool pages. Importing container.ts registers the tools.
 
 import { NextResponse } from "next/server";
 import { toolRegistry } from "@penntools/core/tools";

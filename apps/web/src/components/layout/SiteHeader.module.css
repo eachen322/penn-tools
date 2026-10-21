@@ -10,6 +10,13 @@
   border-bottom: 1px solid var(--border);
 }
 
+.start {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: -8px; /* line the menu icon up with the page's left edge */
+}
+
 .brand {
   font-size: 1.15rem;
   font-weight: 700;

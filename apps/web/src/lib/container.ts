@@ -1,23 +1,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Service container — SERVER ONLY
 //
-// This is the single place that reads env vars and wires concrete platform
-// implementations together.  It must NEVER be imported by client components.
-//
-// Every API route imports from here instead of constructing services inline.
-// This makes it trivial to swap implementations (e.g. switch LLM provider)
-// and keeps env access out of every other file.
-//
-// Pattern: manual DI via a lazy singleton.  We avoid heavy DI frameworks to
-// keep the surface area small.  If complexity grows, consider tsyringe or
-// awilix.
+// Registers the tools, reads the platform's env vars (auth.ts reads the
+// sign-in ones) and wires the platform implementations together. Server code
+// gets services from here, or through lib/ai.ts and lib/auth.ts, instead of
+// constructing them inline. It must NEVER be imported by client components.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import "server-only"; // Next.js guard — this module cannot be bundled client-side
 
 import {
   prisma,
-  PrismaToolDataRepository,
   PrismaUserRepository,
   PrismaUserApiKeyRepository,
 } from "@penntools/platform/db";
@@ -28,13 +21,9 @@ import type { AI } from "@penntools/core/ai";
 import { OpenAIAdapter, AnthropicAdapter } from "@penntools/platform/llm";
 import { OpenAIEmbeddingAdapter } from "@penntools/platform/embeddings";
 import type { EmbeddingProvider } from "@penntools/core/embeddings";
-import { PostHogAnalytics } from "@penntools/platform/analytics";
-import { NoopAnalytics } from "@penntools/core/analytics";
-import { toolRegistry, ToolRunner } from "@penntools/core/tools";
-import type { ToolContext } from "@penntools/core/tools";
+import { toolRegistry } from "@penntools/core/tools";
 import type { LLMProvider } from "@penntools/core/llm";
-import type { Analytics } from "@penntools/core/analytics";
-import type { UserId, User } from "@penntools/core/types";
+import type { UserId } from "@penntools/core/types";
 
 // ── Tool bootstrap ────────────────────────────────────────────────────────────
 import { PlatformPlaygroundTool } from "@penntools/tool-platform-playground";
@@ -64,13 +53,9 @@ if (!process.env["DATABASE_URL"]) {
   console.error("[PennTools] DATABASE_URL not set — every database call will fail. See README for local setup.");
 }
 
-export const repositories = {
-  toolData: new PrismaToolDataRepository(prisma),
-  users: new PrismaUserRepository(prisma),
-};
+export const users = new PrismaUserRepository(prisma);
 
-// Kept out of `repositories`, which tools receive as `context.db`, so tools never
-// receive users' keys. Tool code must not import it either (CLAUDE.md, and
+// Users' saved keys. Tool code must not import this (CLAUDE.md, and
 // `pnpm check:tools`); the AI API below reads keys on the tool's behalf.
 export const userApiKeys: UserApiKeyRepository = new PrismaUserApiKeyRepository(prisma);
 
@@ -93,7 +78,7 @@ if (!embeddingProvider) {
 // Generation uses only the user's saved keys, never the platform's. Search-query
 // embeddings use the user's OpenAI key, or OPENAI_API_KEY when they have none
 // (logged as "embeddings.platform_key"). Tool routes reach these through
-// getAI / getEmbeddings in lib/ai.ts; tool execute() gets them on ToolContext.
+// getAI / getEmbeddings in lib/ai.ts.
 
 export function createUserAI(userId: UserId): AI {
   return createAI({
@@ -117,7 +102,7 @@ export async function createUserEmbeddingProvider(
 }
 
 // ── LLM provider (legacy) ─────────────────────────────────────────────────────
-// For existing tools only (context.llm, /api/llm/complete); new tools use the
+// For existing tools only (/api/llm/complete); new tools use the
 // AI API above. Reads OPENAI_API_KEY or ANTHROPIC_API_KEY from env.  Falls back
 // to OpenAI.
 
@@ -148,19 +133,6 @@ export function createLLMFromKey(apiKey: string): LLMProvider {
   return new OpenAIAdapter(apiKey);
 }
 
-// ── Analytics ─────────────────────────────────────────────────────────────────
-
-function createAnalytics(): Analytics {
-  const key = process.env["POSTHOG_API_KEY"];
-  const host = process.env["POSTHOG_HOST"] ?? "https://app.posthog.com";
-  if (key) {
-    return new PostHogAnalytics(key, host);
-  }
-  return new NoopAnalytics();
-}
-
-export const analytics: Analytics = createAnalytics();
-
 // ── Logger ────────────────────────────────────────────────────────────────────
 
 export const logger = {
@@ -171,25 +143,3 @@ export const logger = {
   error: (msg: string, error?: unknown) =>
     console.error(JSON.stringify({ level: "error", msg, error: String(error) })),
 };
-
-// ── ToolRunner ────────────────────────────────────────────────────────────────
-
-export const toolRunner = new ToolRunner({
-  registry: toolRegistry,
-  contextFactory: async (toolId: string, userId: UserId): Promise<ToolContext> => {
-    const user = await repositories.users.findById(userId);
-    if (!user) throw new Error(`User not found: ${userId}`);
-    return {
-      userId,
-      currentUser: user,
-      db: repositories,
-      llm,
-      ai: createUserAI(userId),
-      embeddings: await createUserEmbeddingProvider(userId, toolId),
-      analytics,
-      logger,
-      config: { toolId },
-    };
-  },
-  logger,
-});

@@ -1,20 +1,29 @@
-// Site-wide header: PennTools on the left; sign-in, or the profile icon (to
-// account settings) and log out, on the right. Rendered by the root layout.
+// Site-wide header: the Tools menu and PennTools on the left; sign-in, or the
+// profile icon (to account settings) and log out, on the right. Rendered by the
+// root layout.
 
 import Link from "next/link";
+import { toolRegistry } from "@penntools/core/tools";
 import { getCurrentUser, signInProvider } from "@/lib/auth";
+import "@/lib/container"; // registers the tools
+import { menuTools } from "@/lib/toolsMenu";
 import { SignInButton, SignOutButton } from "./AuthButtons";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { ToolsMenu } from "./ToolsMenu";
 import styles from "./SiteHeader.module.css";
 
 export async function SiteHeader() {
   const user = await getCurrentUser();
+  const tools = menuTools(toolRegistry);
 
   return (
     <header className={styles.header}>
-      <Link href="/" className={styles.brand}>
-        PennTools
-      </Link>
+      <div className={styles.start}>
+        <ToolsMenu tools={tools} />
+        <Link href="/" className={styles.brand}>
+          PennTools
+        </Link>
+      </div>
 
       <div className={styles.actions}>
         {user ? (

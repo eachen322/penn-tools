@@ -8,7 +8,8 @@
 //   - All queries are scoped: WHERE user_id = $userId.
 //
 // Tool metadata is not stored here: tools ship with the app, so the registry
-// in code (built from each tool's meta.json) is the source of truth.
+// in code (each tool's manifest, registered in container.ts) is the source of
+// truth. Tools keep their own data in their own schemas, not in public.
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
@@ -72,8 +73,9 @@ enum ApiKeyProvider {
 
 // ── Tool data ─────────────────────────────────────────────────────────────────
 
-/// Generic key-value store scoped to (userId, toolId).
-/// Allows each tool to persist arbitrary JSON without needing its own table.
+/// Unused: tools keep data in their own schemas now (see setup-tools.mjs).
+/// Kept only because `prisma db push` would drop the table, and refuses to when
+/// it has rows. Remove this model once production's tool_data is confirmed empty.
 model ToolData {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")

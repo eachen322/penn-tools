@@ -1,5 +1,5 @@
 // Tests for check-tool-imports.mjs: runs it against sample tool folders.
-// Run: node --test scripts/
+// Run: node --test "scripts/*.test.mjs"
 
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -40,11 +40,9 @@ export function ToolInfoButton() {
         <>
           <div className={styles.backdrop} onClick={() => setOpen(false)} />
           <div className={styles.popup} role="dialog" aria-label="Tool info">
-            <Row label="Version" value={manifest.version} />
+            <Row label={manifest.title} value={manifest.description} />
             <Row label="Contributors" value={manifest.contributors.join(", ")} />
             {manifest.mentor && <Row label="Mentor" value={manifest.mentor} />}
-            <Row label="Date of inception" value={manifest.inceptionDate} />
-            <Row label="Latest release" value={manifest.latestReleaseDate} />
           </div>
         </>
       )}

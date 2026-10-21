@@ -1,5 +1,3 @@
-import type { ToolOutput } from "@penntools/core/tools";
-
 export interface ParsedCourse {
   /** Wharton course code, e.g. "FNCE6110". Null if the parser couldn't extract it. */
   courseId: string | null;
@@ -23,12 +21,4 @@ export interface ParsedCourse {
   department: string | null;
   /** True when courseId is null or couldn't be matched — needs user review. */
   flagged: boolean;
-}
-
-export interface Tool1Input {
-  prompt: string;
-}
-
-export interface Tool1Output extends ToolOutput {
-  parsedCourses?: ParsedCourse[];
 }

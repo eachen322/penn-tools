@@ -8,7 +8,7 @@ This guide is for teammates testing the tool.
 
 The tool uses an AI model to generate tailored resumes. You need to provide an API key before it will work.
 
-**Option A — Add it to the app config (recommended for local dev):**
+**Add it to the app config:**
 
 1. Open `apps/web/.env.local` in a text editor
 2. Fill in your Anthropic key:
@@ -19,13 +19,6 @@ The tool uses an AI model to generate tailored resumes. You need to provide an A
 3. Save the file and restart the dev server
 
 > **Note:** Anthropic is preferred. If using Anthropic, make sure your account has credits at [console.anthropic.com](https://console.anthropic.com) → Plans & Billing, and that your workspace spend limit is not set to $0 (Settings → Workspaces).
-
-**Option B — Enter it in the AskPenn platform playground:**
-
-1. Go to **[http://localhost:3000/tools/platform-playground](http://localhost:3000/tools/platform-playground)**
-2. Find the API key input field and enter your key
-3. It saves automatically to your browser — no restart needed
-4. The Resume Customizer will pick it up on the next request
 
 ---
 

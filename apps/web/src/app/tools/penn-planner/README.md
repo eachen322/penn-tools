@@ -90,7 +90,7 @@ Extracts graded deliverables only. Skips readings, guest speakers, no-class rows
 **Prompt 2 — Effort Estimator**
 Takes parsed assignments + student rigor level + pace preferences. Applies multiplier against MBA reference dataset. Returns hours, confidence level, and one-sentence reasoning per assignment.
 
-Both prompts use `context.llm` via `/api/llm/complete` — no direct Anthropic/OpenAI calls.
+Both prompts use the legacy LLM API (`/api/llm/complete`) — no direct Anthropic/OpenAI calls.
 
 ---
 
@@ -98,5 +98,5 @@ Both prompts use `context.llm` via `/api/llm/complete` — no direct Anthropic/O
 
 1. **API key** — how do we get a dev key for the LLM API to test end-to-end locally?
 2. **pdfjs-dist** — is there a platform-approved way to handle file uploads / text extraction?
-3. **ToolDataRepository** — can we use `context.db.toolData` to persist personalization prefs (rigor mode, pace) between sessions?
-4. **Analytics** — should we fire events on plan generation and calendar block adds?
+3. **Saving preferences** — to persist personalization prefs (rigor mode, pace) between sessions, use the tool's own database tables (the Database API in section 4 of `CLAUDE.md`). `ToolDataRepository` and `context.db` no longer exist.
+4. **Analytics** — the platform has no analytics API today.

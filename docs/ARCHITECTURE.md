@@ -5,27 +5,25 @@
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  apps/web  (Next.js)                                     │
-│   └─ route handlers → container.ts (DI root)            │
-│   └─ lib/auth.ts (Google sign-in, getCurrentUser)       │
-│   └─ React components → hooks → fetch()                 │
+│   └─ route handlers → container.ts (DI root)             │
+│   └─ lib/auth.ts (Google sign-in, getCurrentUser)        │
+│   └─ React components → hooks → fetch()                  │
 ├──────────────────────────────────────────────────────────┤
 │  packages/platform  (reads env vars, constructs clients) │
 │   ├─ Prisma repositories                                 │
 │   ├─ AI adapters (OpenAI Responses, Anthropic Messages)  │
 │   ├─ Legacy LLM adapters (OpenAI, Anthropic)             │
 │   ├─ Embedding adapters (OpenAI)                         │
-│   ├─ Analytics (PostHog)                                 │
 │   └─ Tool databases (toolSql; setup-tools for db:deploy) │
 ├──────────────────────────────────────────────────────────┤
 │  packages/core  (pure interfaces, no env, no vendor SDK) │
-│   ├─ Tool, ToolRegistry, ToolRunner, ToolContext         │
+│   ├─ Tool (manifest), ToolRegistry, Logger               │
 │   ├─ AI API types, model catalog, AIError, z (Zod)       │
 │   ├─ EmbeddingProvider, legacy LLMProvider interfaces    │
-│   ├─ Analytics interface                                 │
-│   └─ Repository interfaces (User, ToolData, UserApiKey) │
+│   └─ Repository interfaces (User, UserApiKey)            │
 ├──────────────────────────────────────────────────────────┤
 │  tools/<tool_id>  (one folder per tool)                  │
-│   ├─ extend Tool, implement execute(input, context)      │
+│   ├─ a Tool class with the manifest, plus its logic      │
 │   └─ optional schema.sql + seed.mjs (own DB schema)      │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -61,84 +59,92 @@ tool's own database. The Playground shows single replies, structured output,
 embeddings, the User API and testing with fake APIs.
 
 Each tool ships with:
-- **Backend logic** — the `Tool` class in `tools/<tool-id>/` (pure `core`-only, no UI)
+- **Backend logic** — functions in `tools/<tool-id>/` (`core`-only, no UI) that the
+  tool's page, routes and server actions call, plus a `Tool` class holding its manifest
 - **UI page** — a Next.js page at `apps/web/src/app/tools/[tool-id]/page.tsx`
 - **UI components** — co-located under `apps/web/src/app/tools/[tool-id]/`
 
 The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
-tool's name and description, shown by the tool pages' info button (`/api/tools`):
+tool's title, description and contributors. The site's Tools menu lists its title,
+and the info button on its page shows the rest (from `/api/tools`):
 
 ```ts
-manifest = {
-  id: "course-finder",
-  name: "Course Finder",
-  description: "Find Penn courses by topic, requirement, or instructor.",
+export class AskPennTool extends Tool {
+  readonly manifest: ToolManifest = {
+    id: "askpenn",
+    title: "AskPenn",
+    description: "Chat with an AI assistant for Penn students and staff, …",
+    contributors: ["Platform team"],
+    // and an optional mentor
+  };
 }
 ```
 
-### Folder layout (tool with UI)
+### Folder layout (AskPenn)
 
 ```
 tools/
-  course-finder/          ← backend package (@penntools/tool-course-finder)
+  askpenn/                ← backend package (@penntools/tool-askpenn)
     src/
-      index.ts            ← CourseFinderTool extends Tool<Input, Output>
-    src/__tests__/
+      AskPennTool.ts      ← the manifest
+      conversation.ts     ← the tool's logic: replies with the AI API
+      chats.ts            ← reads and writes its own tables
+      index.ts            ← exports the tool class and its functions
+      __tests__/          ← tests with a fake AI and a throwaway schema
+    schema.sql            ← optional: the tool's own database tables
 
-apps/web/src/app/
-  tools/
-    page.tsx              ← /tools  →  directory of all registered tools
-    [tool-id]/
-      page.tsx            ← /tools/course-finder  →  tool's full UI
-      components/         ← tool-specific React components (optional)
+apps/web/src/app/tools/
+  askpenn/
+    page.tsx              ← /tools/askpenn: checks sign-in and saved keys
+    actions.ts            ← server actions that call the tool's logic
+    stream/route.ts       ← a route, for streaming replies to the page
+    AskPenn.tsx           ← the page's client component (+ AskPenn.module.css)
 ```
 
 ### Adding a new tool
 
-1. `mkdir tools/my-tool && cd tools/my-tool`
-2. Copy the structure of `tools/course-finder`.
-3. Extend `Tool<MyInput, MyOutput>` and fill in `manifest` + `execute()`.
-4. Add `@penntools/tool-my-tool` to `apps/web/package.json` dependencies.
-5. In `apps/web/src/lib/container.ts`, add one import + one `toolRegistry.register(new MyTool())` call (guarded by the duplicate-id check).
-6. Create `apps/web/src/app/tools/my-tool/page.tsx` for the tool's UI page.
-7. Write tests in `src/__tests__/`.
+1. Run `pnpm new-tool` (or ask your coding agent to "Register new team", and it
+   runs the script). It creates the tool package with its manifest, a
+   placeholder page, and the entries in `apps/web/package.json` and
+   `container.ts`.
+2. Put the tool's logic in `tools/<tool-id>/src/`, and call it from server
+   actions or routes in the tool's page folder, which pass in the platform APIs
+   (`getAI`, `getEmbeddings`, `toolSql`). CLAUDE.md section 4 has the details;
+   AskPenn and the Platform Playground are the reference tools.
+3. Write tests in `src/__tests__/`, passing in fakes for the APIs (see the
+   Playground's `demos.test.ts`).
 
 ### How the registry works
 
-Tools are registered **explicitly** at server startup (not at import time).
-This avoids hidden ordering dependencies and allows isolated registries in tests.
+Tools are registered **explicitly** at server startup, in `container.ts` (not at
+import time), which keeps the order predictable and lets tests use their own
+`new ToolRegistry()`. `pnpm new-tool` writes a new tool's two registration lines.
 
 ```ts
 // container.ts (server-only, runs once per process)
 import { toolRegistry } from "@penntools/core/tools";
-import { CourseFinderTool } from "@penntools/tool-course-finder";
-
-if (!toolRegistry.get("course-finder")) {
-  toolRegistry.register(new CourseFinderTool());
-}
+import { AskPennTool } from "@penntools/tool-askpenn";
+toolRegistry.register(new AskPennTool());
 ```
 
-`ToolRunner.run(toolId, input, userId)` looks up the tool, checks `canAccess()`,
-builds a `ToolContext` (injecting db, llm, ai, embeddings, analytics, logger,
-config), and calls `tool.execute(input, context)`. Nothing in the app calls it
-since AskPenn's `/tool` chat command was removed: tools do their work from their
-own pages, routes and server actions, and `execute()`, `ToolContext` and
-`ToolRunner` are due to be removed.
+The registry only holds manifests: the site header reads it for the Tools menu,
+and `/api/tools` serves it to the tool pages' info button. A tool does its work
+from its own pages, routes and server actions.
 
 ---
 
 ## AI API
 
 New tools generate text and structured data through `@penntools/core/ai`;
-existing tools keep the legacy LLM API (`context.llm`, `/api/llm/complete`)
+existing tools keep the legacy LLM API (`/api/llm/complete`)
 until they migrate, after which it is deleted. How to call it is in CLAUDE.md
 section 4; this section covers the design.
 
 - **Keys stay server-side.** `createUserAI(userId)` in `container.ts` builds an
   `AI` whose calls use that user's saved key for the requested provider, and
   fail with `missing_key` when there is none; the platform's keys are never
-  used for generation. Tools get it as `context.ai`, or from `getAI()`
-  (`apps/web/src/lib/ai.ts`, bound to the signed-in user). Keys stay inside the
+  used for generation. Tools get it from `getAI()` (`apps/web/src/lib/ai.ts`,
+  bound to the signed-in user). Keys stay inside the
   adapters' closures, and `AIError` messages are written by the platform, so no
   key reaches tool code or logs.
 - **One model catalog.** The tool picks the provider; models and their default
@@ -156,7 +162,7 @@ section 4; this section covers the design.
   provider errors map to a kind, and anything else (a connection dropped
   mid-stream, a bug) becomes `unavailable` and is logged in full.
 - **Embeddings.** Always OpenAI with `EMBEDDING_MODEL`. Seeds (`db:deploy`) use
-  the platform's key. Search queries (`context.embeddings`, `getEmbeddings`)
+  the platform's key. Search queries (`getEmbeddings`)
   use the user's OpenAI key, or `OPENAI_API_KEY` when they haven't saved one;
   each platform-key call logs `embeddings.platform_key`, and its cost shows on
   that key in OpenAI's usage dashboard.
@@ -190,7 +196,12 @@ The root layout (`apps/web/src/app/layout.tsx`) renders `SiteHeader`
 (`apps/web/src/components/layout/SiteHeader.tsx`) above every page, including
 tool pages. It is a server component that calls `getCurrentUser()`:
 
-- **Left:** "PennTools", linking to the home page.
+- **Left:** the Tools menu button, then "PennTools", linking to the home page.
+  The menu (`ToolsMenu`) opens a panel under the header, over the page, listing
+  every registered tool by title, so new tools appear on their own. The
+  exceptions are tools not yet migrated to the current platform, listed in
+  `NOT_YET_MIGRATED` (`apps/web/src/lib/toolsMenu.ts`); delete a tool's ID there
+  when it's migrated.
 - **Signed out:** a **Sign in** button. It signs in with the provider in
   `signInProvider` (Google, or the local development user) and returns to the
   same page. It is disabled when sign-in isn't configured.
@@ -226,15 +237,15 @@ For page authors this means:
 See `packages/platform/prisma/schema.prisma` for the canonical schema.
 
 Key design choices:
-- `tool_data` uses a generic `(userId, toolId, key) → jsonValue` pattern so tools
-  can persist state without needing their own migrations.
+- `tool_data` is unused: tools keep their data in their own schemas (below). The
+  model stays only because `prisma db push` would drop the table; remove it once
+  production's table is confirmed empty.
 - `user_api_keys` holds the OpenAI and Anthropic keys users save on `/settings`
   (at most one per provider), in plain text. Keys are checked with the provider
   before saving and never sent back to the browser; the page shows only the last
-  four characters. The repository is `userApiKeys` in `container.ts`, kept out of
-  `repositories` (which tools get as `context.db`), so tools never receive keys;
-  tool code must not import it either (enforced by `pnpm check:tools`). The AI
-  API reads keys on the tool's behalf.
+  four characters. The repository is `userApiKeys` in `container.ts`; tool code
+  must not import it (enforced by `pnpm check:tools`). The AI API reads keys on
+  the tool's behalf.
 - Tools that need real tables (queries across users, relations, search) get their
   own Postgres role and schema in the same database, never tables in `public`,
   which `prisma db push` manages and would drop. `db:deploy` (`prisma db push`,
@@ -242,8 +253,8 @@ Key design choices:
   and, as that role, applies `tools/{id}/schema.sql` and runs the optional
   `tools/{id}/seed.mjs`. Like `prisma db push` for the platform, both run on
   every deploy and must be safe to re-run; there are no migrations. A tool role
-  cannot read platform or other tools' tables. Compass (tool 19, schema
-  `compass`) is the reference.
+  cannot read platform or other tools' tables. AskPenn (schema `askpenn`) is
+  the reference.
 - Tools use pgvector from `public`, where the platform installs it. That schema is
   not on a tool role's `search_path`, so tool SQL schema-qualifies the type and
   operators (`public.vector`, `OPERATOR(public.<=>)`). Each vector is stored
@@ -257,16 +268,18 @@ Key design choices:
 
 ## Configuration
 
-All env var reads happen in `packages/platform`, `apps/web/src/lib/container.ts`
-and `apps/web/src/lib/auth.ts`. Core interfaces and tools never access `process.env`.
+The platform's env var reads happen in `packages/platform`,
+`apps/web/src/lib/container.ts` and `apps/web/src/lib/auth.ts`; `core` and tool
+packages (`tools/*`) never access `process.env`. Two older tools read their own
+variables in their pages and routes: Compass (`COMPASS_ICS_FEED_URL`,
+`TOOL19_ADMIN_KEY`, `NEXT_PUBLIC_TOOL19_ADMIN_KEY`) and Penn Planner
+(`NEXT_PUBLIC_GCAL_CLIENT_ID`).
 
 | Variable | Used by | Purpose |
 |----------|---------|---------|
 | `DATABASE_URL` | platform/prisma, `db:deploy` | Postgres admin connection; tool role passwords are derived from it |
 | `OPENAI_API_KEY` | platform/embeddings, web/lib/container, `db:deploy`, platform/llm | Embeddings: tool seeds (e.g. Career Canvas course embeddings; skipped when unset) and search queries from users without their own OpenAI key. Also the legacy LLM API |
 | `ANTHROPIC_API_KEY` | platform/llm | Legacy LLM API only; the AI API uses users' own keys |
-| `POSTHOG_API_KEY` | platform/analytics | Event tracking |
-| `POSTHOG_HOST` | platform/analytics | PostHog instance URL |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | web/lib/auth | Google sign-in (OAuth client); without them, development signs in as a local user and production disables sign-in |
 | `NEXTAUTH_SECRET` | web/lib/auth | Signs session cookies; required with the Google credentials |
 | `NEXTAUTH_URL` | web/lib/auth | The site's public URL; required in production |

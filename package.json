@@ -11,6 +11,7 @@
     "test": "turbo test && node --test \"scripts/*.test.mjs\"",
     "typecheck": "turbo typecheck",
     "check:tools": "node scripts/check-tool-imports.mjs",
+    "new-tool": "node scripts/new-tool.mjs",
     "clean": "turbo clean && rm -rf node_modules"
   },
   "pnpm": {

@@ -1,5 +1,3 @@
-import type { ToolOutput } from "@penntools/core/tools";
-
 // ── Domain types ────────────────────────────────────────────────────────────────
 
 export interface ContextItem {
@@ -30,10 +28,3 @@ export type Tool7Action =
   | { action: "generate"; job_description: string };
 
 export type Tool7Input = { user_id: string } & Tool7Action;
-
-// ── Tool output ─────────────────────────────────────────────────────────────────
-
-export interface Tool7Output extends ToolOutput {
-  /** Echoes back the affected data record for the frontend to inspect. */
-  data?: UserData | GeneratedOutput;
-}
