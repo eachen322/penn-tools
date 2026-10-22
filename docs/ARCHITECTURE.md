@@ -78,8 +78,9 @@ export class AskPennTool extends Tool {
     contributors: ["Platform team"],
     category: "Platform", // one of TOOL_CATEGORIES in @penntools/core/tools
     beta: true,           // shown as BETA
-    // fullWidth: true,   // fill the page area, not the 720px column (see Page layout)
-    // and optionally a mentor, and notYetMigrated (below)
+    fullWidth: true,      // fill the page area, not the 720px column (see Page layout)
+    // and optionally a mentor, hideInfoButton (see Page layout) and
+    // notYetMigrated (below)
   };
 }
 ```
@@ -276,10 +277,11 @@ For page authors this means:
 
 - Tool pages sit in a centered 720px column, with the info button (the tool's
   description and contributors) in the top-right corner. A tool whose manifest
-  sets `fullWidth: true` fills the whole page area instead and has no info button,
-  since a full-width page usually has its own header there. The tools layout
-  (`apps/web/src/app/tools/layout.tsx`) reads that from the manifests. Career
-  Canvas and AskPenn are full-width. A full-width page area is `position:
+  sets `fullWidth: true` fills the whole page area instead, and keeps the info
+  button; one whose own header has something in that corner also sets
+  `hideInfoButton: true`. The tools layout (`apps/web/src/app/tools/layout.tsx`)
+  reads both from the manifests. Career Canvas and AskPenn are full-width, and
+  Career Canvas hides the button, since its header has My Profile there. A full-width page area is `position:
   relative` and at least as tall as the space, so a layout that should fill it
   exactly, such as AskPenn's chat, uses `position: absolute; inset: 0`. Don't
   break out of the column with CSS instead.

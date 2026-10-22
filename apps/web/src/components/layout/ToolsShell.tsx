@@ -1,9 +1,10 @@
 "use client";
 
 // The frame around a tool's pages (see app/tools/layout.tsx, which reads the
-// manifests on the server): the info button in the corner and a centered column,
-// or, for a full-width tool, the whole page area and no info button. A page
-// under /tools that isn't a registered tool gets the column and no button.
+// manifests on the server): the info button in the corner, unless the tool's
+// manifest hides it, and a centered column, or the whole page area for a
+// full-width tool. A page under /tools that isn't a registered tool gets the
+// column and no button.
 
 import { useSelectedLayoutSegment } from "next/navigation";
 import type { ToolPageInfo } from "@/lib/toolCatalog";
@@ -17,7 +18,7 @@ export function ToolsShell({ tools, children }: { tools: Record<string, ToolPage
 
   return (
     <div className={styles.container}>
-      {tool && !full && (
+      {tool && !tool.hideInfoButton && (
         <div className={styles.infoCorner}>
           <ToolInfoButton tool={tool} />
         </div>

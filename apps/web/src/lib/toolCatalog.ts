@@ -69,9 +69,9 @@ function fromManifest(m: ToolManifest): CatalogTool {
 }
 
 /**
- * What a tool's pages need from its manifest: the info button's details and
- * whether the page is full-width. Only these go to the browser, not the whole
- * manifest.
+ * What a tool's pages need from its manifest: the info button's details, and
+ * whether the page is full-width and shows the button. Only these go to the
+ * browser, not the whole manifest.
  */
 export interface ToolPageInfo {
   title: string;
@@ -79,6 +79,7 @@ export interface ToolPageInfo {
   contributors: string[];
   mentor: string | null;
   fullWidth: boolean;
+  hideInfoButton: boolean;
 }
 
 /** Each registered tool's ToolPageInfo, by tool ID, for the tools layout. */
@@ -92,6 +93,7 @@ export function toolPageInfo(manifests: readonly ToolManifest[]): Record<string,
         contributors: m.contributors,
         mentor: m.mentor || null,
         fullWidth: m.fullWidth === true,
+        hideInfoButton: m.hideInfoButton === true,
       },
     ]),
   );

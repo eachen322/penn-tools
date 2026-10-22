@@ -1,5 +1,6 @@
-// Layout for every tool page: the info button in the corner and a centered
-// 720px column, or the whole page area for tools whose manifest sets fullWidth.
+// Layout for every tool page: the info button in the corner (unless the tool's
+// manifest sets hideInfoButton) and a centered 720px column, or the whole page
+// area for tools whose manifest sets fullWidth.
 // It reads the manifests here, on the server, and passes each tool's details down.
 
 import { toolRegistry } from "@penntools/core/tools";

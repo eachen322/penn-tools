@@ -79,16 +79,20 @@ describe("toolCatalog", () => {
 });
 
 describe("toolPageInfo", () => {
-  it("marks only the tools whose manifest sets fullWidth as full-width", () => {
+  it("sets full width and the info button from their own manifest fields, independently", () => {
     const info = toolPageInfo([
       manifest("chat", "Platform", { fullWidth: true }),
+      manifest("canvas", "LLM Tools", { fullWidth: true, hideInfoButton: true }),
       manifest("column", "LLM Tools"),
-      manifest("explicit", "LLM Tools", { fullWidth: false }),
+      manifest("bare", "LLM Tools", { hideInfoButton: true }),
+      manifest("explicit", "LLM Tools", { fullWidth: false, hideInfoButton: false }),
     ]);
-    expect(Object.fromEntries(Object.entries(info).map(([id, t]) => [id, t.fullWidth]))).toEqual({
-      chat: true,
-      column: false,
-      explicit: false,
+    expect(Object.fromEntries(Object.entries(info).map(([id, t]) => [id, [t.fullWidth, t.hideInfoButton]]))).toEqual({
+      chat: [true, false],
+      canvas: [true, true],
+      column: [false, false],
+      bare: [false, true],
+      explicit: [false, false],
     });
   });
 
@@ -97,7 +101,14 @@ describe("toolPageInfo", () => {
       manifest("a", "LLM Tools", { title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace", notYetMigrated: true }),
       manifest("b", "LLM Tools", { mentor: "" }),
     ]);
-    expect(info["a"]).toEqual({ title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace", fullWidth: false });
+    expect(info["a"]).toEqual({
+      title: "A",
+      description: "Does A.",
+      contributors: ["Ada"],
+      mentor: "Grace",
+      fullWidth: false,
+      hideInfoButton: false,
+    });
     expect(info["b"]?.mentor).toBeNull();
   });
 });
