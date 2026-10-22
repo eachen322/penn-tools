@@ -2,8 +2,8 @@
 // ToolRegistry
 //
 // Every tool registers its manifest in apps/web/src/lib/container.ts (server
-// only). The registry feeds the site's Tools menu and the tool pages' info
-// button. Tests can use their own `new ToolRegistry()`.
+// only). The registry feeds the site sidebar, the dashboard and the tool pages'
+// info button. Tests can use their own `new ToolRegistry()`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Tool, ToolManifest } from "./Tool.js";

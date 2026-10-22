@@ -18,6 +18,9 @@
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -25,10 +28,36 @@
   text-decoration: none;
 }
 
+.logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .actions {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+.github:hover { background: var(--nav-hover); }
+
+@media (max-width: 480px) {
+  .githubText { display: none; }
 }
 
 .profile {

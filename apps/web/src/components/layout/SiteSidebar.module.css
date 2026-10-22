@@ -1,0 +1,146 @@
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--text);
+}
+.toggle:hover { background: var(--nav-hover); }
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 8px 24px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+}
+.closed { display: none; }
+
+.item,
+.sectionToggle,
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.item:hover,
+.sectionToggle:hover,
+.tool:hover { background: var(--nav-hover); }
+.item > svg,
+.sectionToggle > svg { flex-shrink: 0; }
+
+.item {
+  padding: 9px 12px;
+  font-size: 0.9rem;
+}
+
+.current { background: var(--nav-active); font-weight: 500; }
+
+.section { margin-top: 14px; }
+
+.sectionToggle {
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--section-label);
+}
+
+.chevron {
+  display: flex;
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+.chevronCollapsed { transform: rotate(-90deg); }
+
+.tools {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.tools[hidden] { display: none; }
+
+/* Lined up with the section names, after the 16px icon and its gap. */
+.tool {
+  padding: 7px 12px 7px 38px;
+  font-size: 0.875rem;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.external {
+  display: flex;
+  margin-left: auto;
+  color: var(--muted);
+}
+.tool:hover .external { color: var(--penn-blue); }
+
+.pill {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f5f3ef 0%, #ebe7df 100%);
+  color: #667a90;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+.scrim { display: none; }
+
+/* Narrow screens: a drawer under the header, over the page. The sidebar is
+   outside .app-viewport, so position: fixed here is relative to the window. */
+@media (max-width: 768px) {
+  .sidebar,
+  .closed {
+    display: block;
+    position: fixed;
+    top: var(--header-height);
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0.2s;
+  }
+  .drawerOpen {
+    transform: none;
+    visibility: visible;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.06);
+  }
+
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: var(--header-height) 0 0 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .closed,
+  .chevron { transition: none; }
+}

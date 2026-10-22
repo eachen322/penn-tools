@@ -65,8 +65,8 @@ Each tool ships with:
 - **UI components** — co-located under `apps/web/src/app/tools/[tool-id]/`
 
 The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
-tool's title, description and contributors. The site's Tools menu lists its title,
-and the info button on its page shows the rest (from `/api/tools`):
+tool's title, description and contributors. The site sidebar and the dashboard list
+it, and the info button on its page shows the rest (from `/api/tools`):
 
 ```ts
 export class AskPennTool extends Tool {
@@ -127,8 +127,9 @@ import { AskPennTool } from "@penntools/tool-askpenn";
 toolRegistry.register(new AskPennTool());
 ```
 
-The registry only holds manifests: the site header reads it for the Tools menu,
-and `/api/tools` serves it to the tool pages' info button. A tool does its work
+The registry only holds manifests: the root layout and the home page read it for
+the site sidebar and the dashboard (see **Tool catalog** below), and `/api/tools`
+serves it to the tool pages' info button. A tool does its work
 from its own pages, routes and server actions.
 
 ---
@@ -188,7 +189,7 @@ section 4; this section covers the design.
 
 ---
 
-## Site header and page layout
+## Site header, sidebar and page layout
 
 ### Site header
 
@@ -196,12 +197,10 @@ The root layout (`apps/web/src/app/layout.tsx`) renders `SiteHeader`
 (`apps/web/src/components/layout/SiteHeader.tsx`) above every page, including
 tool pages. It is a server component that calls `getCurrentUser()`:
 
-- **Left:** the Tools menu button, then "PennTools", linking to the home page.
-  The menu (`ToolsMenu`) opens a panel under the header, over the page, listing
-  every registered tool by title, so new tools appear on their own. The
-  exceptions are tools not yet migrated to the current platform, listed in
-  `NOT_YET_MIGRATED` (`apps/web/src/lib/toolsMenu.ts`); delete a tool's ID there
-  when it's migrated.
+- **Left:** the hamburger that hides or shows the site sidebar, then the
+  Wharton AI Club logo and "PennTools", linking to the home page.
+- **Right, always:** a **GitHub** link to the repository, before the sign-in
+  controls below.
 - **Signed out:** a **Sign in** button. It signs in with the provider in
   `signInProvider` (Google, or the local development user) and returns to the
   same page. It is disabled when sign-in isn't configured.
@@ -219,18 +218,57 @@ their title ("Sign in to use AskPenn."), and, if they run on the AI API,
 rather than being prerendered; it is cached per request, so the header and the
 page share one user lookup.
 
+### Tool catalog
+
+`toolCatalog()` (`apps/web/src/lib/toolCatalog.ts`) sorts every tool on the
+site into sections, for both the site sidebar and the dashboard:
+
+- **Community tools** by category (Recruiting, Academics, Productivity): apps
+  that live outside this repo and open in a new tab, listed by hand in
+  `apps/web/src/data/communityTools.ts`.
+- **LLM Tools (BETA):** every registered tool except the Platform ones, so a new
+  tool appears here as soon as `container.ts` registers it.
+- **Platform:** the tools in `PLATFORM_TOOLS` (the Platform Playground, and
+  AskPenn in beta).
+
+### Site sidebar
+
+The root layout renders `SiteSidebar`
+(`apps/web/src/components/layout/SiteSidebar.tsx`) to the left of every page: a
+**Dashboard** link, then each section of the catalog with its tools. A tool links
+to its page, or out to a community tool in a new tab. Clicking a section's name
+collapses or expands it; the `penntools_sidebar_collapsed` cookie remembers which
+are collapsed.
+
+- **Desktop:** open unless the user hides it with the header's hamburger. The
+  `penntools_sidebar` cookie remembers that, so the server renders it the same
+  way and it doesn't flash on load.
+- **Narrow screens (768px or less):** a drawer over the page, closed until the
+  hamburger opens it, and closing on choosing a link, changing pages, Escape or a
+  click outside it.
+
+### Home page
+
+The home page (`apps/web/src/app/page.tsx`) is the dashboard
+(`apps/web/src/components/dashboard/`): the catalog's sections as tiles. Each
+tile shows a screenshot from `apps/web/public/dashboard/{id}.jpg`, captured by
+`scripts/capture-tool-screenshots.py`; a tool without one gets a plain tile.
+
 ### Page layout
 
-Below the header, every page renders inside `.app-viewport`, which fills the rest
-of the window and scrolls on its own (styles in `apps/web/src/app/globals.css`).
+Below the header and beside the sidebar, every page renders inside
+`.app-viewport`, which fills the rest of the window and scrolls on its own
+(styles in `apps/web/src/app/globals.css`).
 For page authors this means:
 
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`;
   `100vh` is taller than the space under the header and adds a scrollbar.
-- `position: fixed` is relative to the area under the header, not the window
+- `position: fixed` is relative to the page's area, not the window
   (`.app-viewport` uses `contain: layout`). A full-screen container pinned with
-  `top: 0 … bottom: 0` fills the area under the header instead of covering it,
-  and fixed modals and toasts stay in place while the page scrolls.
+  `top: 0 … bottom: 0` fills that area instead of covering the header and
+  sidebar, and fixed modals and toasts stay in place while the page scrolls.
+- The page's width changes when the user hides or shows the sidebar, so don't
+  assume the window's width.
 - Don't build sign-in UI in a tool; when a platform API returns `401`, ask the
   user to sign in with the button in the header.
 

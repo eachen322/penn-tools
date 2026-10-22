@@ -1,0 +1,206 @@
+.content {
+  container-type: inline-size;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 0 40px;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--penn-blue);
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--section-label);
+  font-size: 1rem;
+  margin-bottom: 28px;
+}
+
+
+/* Sections */
+.section {
+  padding-top: 12px;
+  margin-bottom: 36px;
+  scroll-margin-top: 24px;
+}
+
+.sectionLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--section-label);
+  margin: 0 0 14px;
+}
+
+.betaSection {
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.betaHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
+.betaHeader .sectionLabel { margin: 0; }
+
+.labelWithPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.betaNote {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.betaNote a { color: var(--penn-blue); font-weight: 500; }
+
+/* Three tiles a row (two, then one, as the page narrows), with a row of fewer
+   centered. Flex rather than grid, since grid can't center a partial row. */
+.grid {
+  --columns: 3;
+  --gap: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+}
+.grid > .tile {
+  flex: 0 0 calc((100% - (var(--columns) - 1) * var(--gap)) / var(--columns));
+  min-width: 0;
+}
+@container (max-width: 820px) { .grid { --columns: 2; } }
+@container (max-width: 520px) { .grid { --columns: 1; } }
+
+/* Tiles */
+.tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.tile:hover {
+  border-color: #cfd6e4;
+  box-shadow: 0 10px 28px rgba(15, 45, 115, 0.08);
+  transform: translateY(-2px);
+}
+.tile:focus-visible { outline: 2px solid var(--penn-blue); outline-offset: 2px; }
+
+.tilePreview {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--sidebar-bg);
+  border-bottom: 1px solid var(--border);
+}
+.tilePreview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.3s ease;
+}
+.tile:hover .tilePreview img { transform: scale(1.03); }
+
+.tileBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+}
+
+.tileHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tileTitleWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tileTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.externalIcon {
+  color: var(--muted);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.tile:hover .externalIcon { color: var(--penn-blue); }
+
+.betaSticker {
+  display: inline-flex;
+  align-items: center;
+  height: 1.2rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  background: linear-gradient(180deg, #f5f3ef 0%, #ebe7df 100%);
+  color: #667a90;
+}
+
+.tileDesc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #4a4a57;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tileFoot {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.tileBuilders { line-height: 1.45; }
+
+.tileMeta { flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .content { padding: 0 16px 64px; }
+  .hero { padding-top: 32px; }
+  .title { font-size: 2.25rem; }
+}

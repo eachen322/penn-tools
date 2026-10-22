@@ -114,7 +114,7 @@ The recommended way is to ask your coding agent:
 
 > "Register new team"
 
-The agent asks for a tool ID (a name like `course-finder`), title, description, contributors and mentor, then runs the scaffold script for you. The new tool appears in the site's Tools menu (the button at the left of the header) right away. To run it yourself, answer its questions in the terminal, or pass the answers as options (some terminals, such as Git Bash on Windows, can't answer questions):
+The agent asks for a tool ID (a name like `course-finder`), title, description, contributors and mentor, then runs the scaffold script for you. The new tool appears in the site sidebar and on the dashboard, under LLM Tools, right away. To run it yourself, answer its questions in the terminal, or pass the answers as options (some terminals, such as Git Bash on Windows, can't answer questions):
 
 ```bash
 pnpm new-tool

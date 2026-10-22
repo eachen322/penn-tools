@@ -94,7 +94,7 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 > **Usage:** Ask your coding agent: `Implement Database API and refer to the AskPenn (tools/askpenn) implementation for guidance.` The tool team writes `tools/{id}/schema.sql` (and, for reference data, `tools/{id}/seed.mjs`, as Career Canvas does), and its routes or server actions pass `toolSql("<name>")` into the tool's functions. Registering the tool in `TOOLS` in `packages/platform/scripts/setup-tools.mjs` is outside a tool team's scope, so ask the Platform team to add that one line.
 
 #### LLM API (legacy)
-`POST /api/llm/complete`, which uses the platform's key or one the browser sends in `X-Api-Key`. Existing tools keep using it until they migrate; new tools use the AI API instead. Tools not yet on the current platform (most of them still on this API) are listed in `NOT_YET_MIGRATED` (`apps/web/src/lib/toolsMenu.ts`), which keeps them out of the site's Tools menu; when a tool is migrated, ask the Platform team to remove its ID there.
+`POST /api/llm/complete`, which uses the platform's key or one the browser sends in `X-Api-Key`. Existing tools keep using it until they migrate; new tools use the AI API instead.
 
 ### How to add an API integration
 
@@ -157,7 +157,7 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 
 ### Tool pages: header and layout
 
-Every page, including tool pages, renders below the site header (the Tools menu and PennTools on the left; **Sign in**, or the profile icon and **Log out**, on the right). Tool pages render in the area under it, which scrolls on its own:
+Every page, including tool pages, renders below the site header (the sidebar's hamburger, logo and PennTools on the left; the GitHub link, then **Sign in** or the profile icon and **Log out**, on the right) and beside the site sidebar, which lists every tool by section. Tool pages render in the area left over, which scrolls on its own:
 
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`.
 - `position: fixed` is relative to the area under the header, so a container pinned with `top: 0 … bottom: 0` fills that area rather than the window.

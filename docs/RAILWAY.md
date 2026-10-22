@@ -12,7 +12,7 @@ slightly differently from what's written here.
 Probably not yet. Building and testing a tool works on your own computer: run
 `bash scripts/setupAndRun.sh` (see the README) and you get the whole site at
 `http://localhost:3000`. That includes its own database, AskPenn, the Platform
-Playground, your tool's pages and routes, and the Tools menu.
+Playground, your tool's pages and routes, and the site sidebar.
 
 A Railway instance adds what your computer can't give you:
 
@@ -148,7 +148,7 @@ Each deploy:
 
 On your public URL:
 
-- [ ] The home page loads, with the Tools menu at the left of the header.
+- [ ] The home page loads, with the tools listed in the sidebar at the left.
 - [ ] **Sign in** works with one of the Google accounts you sent in step 6.
 - [ ] In **Settings**, you can save an OpenAI or Anthropic API key.
 - [ ] **AskPenn** answers a message.

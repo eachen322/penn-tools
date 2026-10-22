@@ -3,7 +3,7 @@
 //
 // Every PennTool extends this class and registers an instance in
 // apps/web/src/lib/container.ts. The class holds the tool's manifest: its title
-// is listed in the site's Tools menu, and the info button on its page shows its
+// is listed in the site sidebar, and the info button on its page shows its
 // description and contributors. A tool's work happens in its own page, routes
 // and server actions (apps/web/src/app/tools/{id}/), which call functions in
 // the tool's package.
