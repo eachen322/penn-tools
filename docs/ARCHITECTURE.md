@@ -214,7 +214,12 @@ tool pages. It is a server component that calls `getCurrentUser()`:
   controls below.
 - **Signed out:** a **Sign in** button. It signs in with the provider in
   `signInProvider` (Google, or the local development user) and returns to the
-  same page. It is disabled when sign-in isn't configured.
+  same page. It is disabled when sign-in isn't configured. Only Penn accounts
+  can sign in: the Google account needs a verified email at upenn.edu or a Penn
+  school's subdomain, such as wharton.upenn.edu (the `signIn` callback in
+  `apps/web/src/lib/auth.ts`). Anyone else lands on `/penn-only`, which says so,
+  and Google always shows its account picker so they can choose their Penn
+  account next time.
 - **Signed in:** the profile picture (or initial), linking to account settings
   at `/settings` (the Google profile, and the user's own OpenAI and Anthropic
   API keys; see `user_api_keys` under **Data model**), and **Log out**, which

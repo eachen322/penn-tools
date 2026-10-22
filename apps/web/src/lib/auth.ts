@@ -3,7 +3,9 @@
 //
 // Google sign-in via NextAuth (v4). Sessions are signed JWT cookies, so there
 // are no session tables. Signing in upserts the `users` row for the Google
-// account, and the session carries that row's id as `userId`.
+// account, and the session carries that row's id as `userId`. Only Penn
+// accounts (a verified upenn.edu email) can sign in; others are sent to
+// PENN_ONLY_PAGE, which says so.
 //
 // Signed-out visitors can browse, but have no user: getCurrentUser() returns
 // null and APIs that need a user respond with signInRequired().
@@ -23,6 +25,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers/index";
 import type { User } from "@penntools/core/types";
 import { users, logger } from "./container";
+import { isPennEmail } from "./pennEmail";
+
+/** Where sign-in sends a Google account that isn't a Penn one. */
+export const PENN_ONLY_PAGE = "/penn-only";
 
 declare module "next-auth" {
   interface Session {
@@ -56,7 +62,11 @@ const configuredSecret = process.env["NEXTAUTH_SECRET"];
  */
 function createSignInMethod(): { id: SignInProvider; provider: Provider } | null {
   if (clientId && clientSecret && configuredSecret) {
-    return { id: "google", provider: GoogleProvider({ clientId, clientSecret }) };
+    // Always show Google's account picker, so someone turned away for using a
+    // non-Penn account can choose their Penn one instead of being signed in
+    // with the same account again.
+    const provider = GoogleProvider({ clientId, clientSecret, authorization: { params: { prompt: "select_account" } } });
+    return { id: "google", provider };
   }
   if (process.env.NODE_ENV === "development") {
     console.warn("[PennTools] Google sign-in not configured — Sign in logs in as a local development user.");
@@ -83,6 +93,12 @@ export const authOptions: NextAuthOptions = {
   providers: signInMethod ? [signInMethod.provider] : [],
   session: { strategy: "jwt" },
   callbacks: {
+    // Runs before jwt(), so a non-Penn account never gets a `users` row.
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true; // the local development user
+      const google = profile as { email?: string; email_verified?: boolean } | undefined;
+      return (google?.email_verified === true && isPennEmail(google.email)) || PENN_ONLY_PAGE;
+    },
     async jwt({ token, account }) {
       // `account` is only present on the sign-in request itself.
       if (account) {

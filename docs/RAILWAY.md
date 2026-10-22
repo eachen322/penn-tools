@@ -44,7 +44,9 @@ to develop it.
   embeddings only work with OpenAI. The platform's Anthropic key is optional
   and only serves older tools (step 5), and tools on the current platform
   generate with users' own keys from Settings, never the platform's.
-- **Your team's Google accounts**, to sign in with. Team instances sign in
+- **Your team's Penn Google accounts**, to sign in with. Only accounts with a
+  upenn.edu email address (including school addresses such as
+  wharton.upenn.edu) can sign in. Team instances sign in
   through a shared staging Google OAuth client that the Platform team runs
   (step 6). Without Google sign-in, a deployed instance has no way to sign in
   at all, so anything that needs a user (AskPenn, the Playground, Settings)
@@ -174,6 +176,7 @@ On your public URL:
 | The **Sign in** button is greyed out | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` or `NEXTAUTH_SECRET` is missing |
 | Google says `redirect_uri_mismatch` | Your URL isn't on the staging client yet, was added in the last few hours, or doesn't match exactly (for example after regenerating the domain). See step 6 |
 | Google says access is blocked, or the app isn't verified | Your account isn't one of the staging consent screen's test users: ask the Platform team |
+| Signing in ends on **Penn accounts only** | The Google account's email isn't at upenn.edu: sign in again and choose your Penn account |
 | Semantic search (Career Canvas, the Playground) is off for users without their own OpenAI key | `OPENAI_API_KEY` isn't set |
 
 ## For the Platform team: the staging Google client
