@@ -163,10 +163,11 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 Every page, including tool pages, renders below the site header (the sidebar's hamburger, logo and PennTools on the left; the GitHub link, then **Sign in** or the profile icon and **Log out**, on the right) and beside the site sidebar, which lists every tool by section. Tool pages render in the area left over, which scrolls on its own:
 
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`.
-- `position: fixed` is relative to the area under the header, so a container pinned with `top: 0 … bottom: 0` fills that area rather than the window.
+- Size full-width layouts with `width: 100%`, not `100vw`. `100vw` is the whole window, so with the sidebar open it's wider than the page: it adds a horizontal scrollbar and pushes content out of view. The page's width also changes when the user hides or shows the sidebar.
+- `position: fixed` is relative to the page's area (beside the sidebar and under the header), so a container pinned with `top: 0 … bottom: 0` fills that area rather than the window.
 - Don't build sign-in UI. When a platform API returns `401`, tell the user to sign in with the button in the header.
 
-See **Site header** and **Page layout** in `docs/ARCHITECTURE.md`.
+See **Site header**, **Site sidebar** and **Page layout** in `docs/ARCHITECTURE.md`.
 
 ### Code style
 

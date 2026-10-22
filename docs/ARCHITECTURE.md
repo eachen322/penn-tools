@@ -276,8 +276,10 @@ For page authors this means:
   (`.app-viewport` uses `contain: layout`). A full-screen container pinned with
   `top: 0 … bottom: 0` fills that area instead of covering the header and
   sidebar, and fixed modals and toasts stay in place while the page scrolls.
-- The page's width changes when the user hides or shows the sidebar, so don't
-  assume the window's width.
+- Size full-width layouts with `width: 100%`, not `100vw`. `100vw` is the whole
+  window, so with the sidebar open it's wider than the page: it adds a horizontal
+  scrollbar and pushes content out of view. The page's width also changes when
+  the user hides or shows the sidebar.
 - Don't build sign-in UI in a tool; when a platform API returns `401`, ask the
   user to sign in with the button in the header.
 
