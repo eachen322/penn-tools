@@ -1,41 +1,51 @@
 #!/usr/bin/env python3
 """Capture the preview screenshots shown on the PennTools dashboard tiles.
 
-Usage:
-    python3 scripts/capture-tool-screenshots.py            # every tool
-    python3 scripts/capture-tool-screenshots.py 7 stactab  # just these
+Usage (use `python` or `py` instead of `python3` on Windows):
+    python3 scripts/capture-tool-screenshots.py                          # every tool
+    python3 scripts/capture-tool-screenshots.py career-canvas stactab    # just these
 
-Internal tools are captured from the local dev server, so run `pnpm dev`
-first, below the site header. The capture is signed out, so tools that need
-a signed-in user show their sign-in screen; take those by hand instead. Needs Google Chrome and Pillow (`pip install pillow`). Images are
+Needs Pillow (`pip install pillow`) and Chrome, or Edge, which every Windows
+install has; set CHROME to the browser's path if it isn't found. Images are
 written to apps/web/public/dashboard/{id}.jpg at 640x400.
 
+Registered tools are captured from the local dev server, so run `pnpm dev`
+first. They're cropped to the page area, without the site header and sidebar.
+The capture is signed out, so tools that need a signed-in user show their
+sign-in screen; take those by hand instead.
+
 To add a tool, add a row to TARGETS. A `crop` box (left, top, right, bottom)
-is in pixels of a 1280px-wide window that is `height` tall; use it when the
-top of the page isn't representative.
+is in pixels of a window `width` wide (1280 by default) and `height` tall; use
+it when the top of the page isn't representative.
 """
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "apps/web/public/dashboard"
-CHROME = os.environ.get(
-    "CHROME", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-)
 LOCAL = os.environ.get("PENNTOOLS_URL", "http://localhost:3000")
 SIZE = (640, 400)
 HEADER = 56  # --header-height in apps/web/src/app/globals.css
+SIDEBAR = 260  # --sidebar-width in apps/web/src/app/globals.css
 
 
 def local(path: str) -> dict:
-    """A page on the dev server, cropped to the 1280x800 below the site header."""
-    return {"url": f"{LOCAL}{path}", "height": 800 + HEADER, "crop": (0, HEADER, 1280, 800 + HEADER)}
+    """A page on the dev server: a window wide enough for the sidebar plus a
+    1280px page, cropped to the 1280x800 beside the sidebar and below the header."""
+    return {
+        "url": f"{LOCAL}{path}",
+        "width": SIDEBAR + 1280,
+        "height": HEADER + 800,
+        "crop": (SIDEBAR, HEADER, SIDEBAR + 1280, HEADER + 800),
+    }
 
 
 TARGETS = {
@@ -68,34 +78,66 @@ TARGETS = {
 }
 
 
-def screenshot(url: str, height: int, dest: Path) -> bool:
-    # Some pages (GitHub) keep Chrome alive after the screenshot is written,
-    # so wait for the file rather than for the process.
+def find_browser() -> str:
+    """Chrome, or another Chromium browser that takes the same headless flags.
+    CHROME overrides the search."""
+    if os.environ.get("CHROME"):
+        return os.environ["CHROME"]
+    if sys.platform == "darwin":
+        candidates = [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/Applications/Chromium.app/Contents/MacOS/Chromium",
+            "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+        ]
+    elif sys.platform == "win32":
+        bases = [os.environ.get(k) for k in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA")]
+        candidates = [os.path.join(b, "Google", "Chrome", "Application", "chrome.exe") for b in bases if b]
+        candidates += [os.path.join(b, "Microsoft", "Edge", "Application", "msedge.exe") for b in bases if b]
+    else:
+        candidates = [shutil.which(name) for name in ("google-chrome", "chromium", "chromium-browser", "microsoft-edge")]
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
+    sys.exit("Couldn't find Chrome or Edge. Set CHROME to the browser's path.")
+
+
+def screenshot(browser: str, url: str, width: int, height: int, dest: Path, profile: Path) -> bool:
+    # A fresh profile, so the capture never sees the user's own cookies (a
+    # hidden sidebar, say) or hands off to a browser they have open.
     proc = subprocess.Popen(
         [
-            CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
-            "--virtual-time-budget=10000", f"--window-size=1280,{height}",
+            browser, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+            "--no-first-run", "--no-default-browser-check", f"--user-data-dir={profile}",
+            "--virtual-time-budget=10000", f"--window-size={width},{height}",
             f"--screenshot={dest}", url,
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-    try:
-        proc.wait(timeout=45)
-    except subprocess.TimeoutExpired:
+    # Wait for the file, not the process: on Windows the process started here
+    # can exit before the screenshot is written, and some pages (GitHub) keep
+    # the browser alive after it is. Done once the file stops growing.
+    deadline = time.monotonic() + 45
+    size = -1
+    while time.monotonic() < deadline:
+        current = dest.stat().st_size if dest.exists() else 0
+        if current > 0 and current == size:
+            break
+        size = current
+        time.sleep(0.5)
+    if proc.poll() is None:
         proc.kill()
     return dest.exists() and dest.stat().st_size > 0
 
 
-def capture(tool_id: str, target: dict, tmp: Path) -> bool:
+def capture(browser: str, tool_id: str, target: dict, tmp: Path) -> bool:
     raw = tmp / f"{tool_id}.png"
-    if not screenshot(target["url"], target.get("height", 800), raw):
+    profile = tmp / f"{tool_id}-profile"
+    if not screenshot(browser, target["url"], target.get("width", 1280), target.get("height", 800), raw, profile):
         return False
-    im = Image.open(raw).convert("RGB")
-    if "crop" in target:
-        im = im.crop(target["crop"])
-    else:
-        im = im.crop((0, 0, 1280, 800))
+    with Image.open(raw) as opened:
+        im = opened.convert("RGB")
+    im = im.crop(target.get("crop", (0, 0, 1280, 800)))
     # Fill 640x400, center-cropping any crop box with a different shape.
     scale = max(SIZE[0] / im.width, SIZE[1] / im.height)
     im = im.resize((round(im.width * scale), round(im.height * scale)), Image.LANCZOS)
@@ -111,11 +153,15 @@ def main() -> int:
     if unknown:
         print(f"Unknown tool ids: {', '.join(unknown)}", file=sys.stderr)
         return 1
+    browser = find_browser()
+    print(f"Using {browser}")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     failed = []
-    with tempfile.TemporaryDirectory() as tmp:
+    # On Windows a browser that's slow to exit can still hold a file open, so
+    # don't let cleaning up the temporary folder fail the run.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         for tool_id in ids:
-            ok = capture(tool_id, TARGETS[tool_id], Path(tmp))
+            ok = capture(browser, tool_id, TARGETS[tool_id], Path(tmp))
             print(f"{'ok  ' if ok else 'FAIL'} {tool_id}")
             if not ok:
                 failed.append(tool_id)
