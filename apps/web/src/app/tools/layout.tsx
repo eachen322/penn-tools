@@ -6,7 +6,7 @@ import styles from "./layout.module.css";
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment();
-  const isCareerCanvas = segment === "8";
+  const isCareerCanvas = segment === "career-canvas";
 
   return (
     <div className={styles.container}>

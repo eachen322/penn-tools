@@ -307,7 +307,7 @@ Key design choices:
   not on a tool role's `search_path`, so tool SQL schema-qualifies the type and
   operators (`public.vector`, `OPERATOR(public.<=>)`). Each vector is stored
   with the model that made it; searches compare only the current model's
-  vectors, and the seed re-embeds the rest. Career Canvas (tool 8, schema
+  vectors, and the seed re-embeds the rest. Career Canvas (`tools/career-canvas`, schema
   `careercanvas`) is the reference.
 - Tool metadata is not stored in the database; the registry in code is the
   source of truth.

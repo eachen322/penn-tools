@@ -26,9 +26,6 @@ importers:
       '@penntools/platform':
         specifier: workspace:*
         version: link:../../packages/platform
-      '@penntools/tool-1':
-        specifier: workspace:*
-        version: link:../../tools/1
       '@penntools/tool-18':
         specifier: workspace:*
         version: link:../../tools/18
@@ -38,15 +35,15 @@ importers:
       '@penntools/tool-3':
         specifier: workspace:*
         version: link:../../tools/3
-      '@penntools/tool-7':
-        specifier: workspace:*
-        version: link:../../tools/7
-      '@penntools/tool-8':
-        specifier: workspace:*
-        version: link:../../tools/8
       '@penntools/tool-askpenn':
         specifier: workspace:*
         version: link:../../tools/askpenn
+      '@penntools/tool-career-canvas':
+        specifier: workspace:*
+        version: link:../../tools/career-canvas
+      '@penntools/tool-coursematch-assist':
+        specifier: workspace:*
+        version: link:../../tools/coursematch-assist
       '@penntools/tool-penn-planner':
         specifier: workspace:*
         version: link:../../tools/penn-planner
@@ -56,6 +53,9 @@ importers:
       '@penntools/tool-platform-playground':
         specifier: workspace:*
         version: link:../../tools/platform-playground
+      '@penntools/tool-resume-customizer':
+        specifier: workspace:*
+        version: link:../../tools/resume-customizer
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
@@ -138,22 +138,6 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1(@types/node@20.19.33)
 
-  tools/1:
-    dependencies:
-      '@penntools/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      xlsx:
-        specifier: ^0.18.5
-        version: 0.18.5
-    devDependencies:
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.33)
-
   tools/18:
     dependencies:
       '@penntools/core':
@@ -199,35 +183,6 @@ importers:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.33)
 
-  tools/7:
-    dependencies:
-      '@penntools/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.33)
-
-  tools/8:
-    dependencies:
-      '@penntools/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      postgres:
-        specifier: ^3.4.5
-        version: 3.4.8
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.33)
-
   tools/askpenn:
     dependencies:
       '@penntools/core':
@@ -237,6 +192,38 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.8
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.33)
+
+  tools/career-canvas:
+    dependencies:
+      '@penntools/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.8
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.33)
+
+  tools/coursematch-assist:
+    dependencies:
+      '@penntools/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      xlsx:
+        specifier: ^0.18.5
+        version: 0.18.5
+    devDependencies:
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
@@ -271,6 +258,19 @@ importers:
         version: 1.6.1(@types/node@20.19.33)
 
   tools/platform-playground:
+    dependencies:
+      '@penntools/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.1(@types/node@20.19.33)
+
+  tools/resume-customizer:
     dependencies:
       '@penntools/core':
         specifier: workspace:*

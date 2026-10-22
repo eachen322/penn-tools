@@ -58,9 +58,9 @@ TARGETS = {
     },
     "ai-compass": {"url": "https://akshitkalra.com/aicompass"},
     # Registered tools (tools/*), keyed by manifest id
-    "7": local("/tools/7"),
-    "8": local("/tools/8"),
-    "1": local("/tools/1"),
+    "resume-customizer": local("/tools/resume-customizer"),
+    "career-canvas": local("/tools/career-canvas"),
+    "coursematch-assist": local("/tools/coursematch-assist"),
     "penn-planner": local("/tools/penn-planner"),
     "pitch-coach": local("/tools/pitch-coach"),
     "platform-playground": local("/tools/platform-playground"),

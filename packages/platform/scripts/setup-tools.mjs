@@ -60,7 +60,7 @@ const TOOLS = [
   // connectionLimit caps runaway usage; leave headroom for old + new app
   // instances overlapping during a deploy.
   { name: "compass", dir: "tools/19", connectionLimit: 30 },
-  { name: "careercanvas", dir: "tools/8", connectionLimit: 30 },
+  { name: "careercanvas", dir: "tools/career-canvas", connectionLimit: 30 },
   { name: "askpenn", dir: "tools/askpenn", connectionLimit: 30 },
 ];
 
