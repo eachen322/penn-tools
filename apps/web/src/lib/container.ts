@@ -102,9 +102,8 @@ export async function createUserEmbeddingProvider(
 }
 
 // ── LLM provider (legacy) ─────────────────────────────────────────────────────
-// For existing tools only (/api/llm/complete); new tools use the
-// AI API above. Reads OPENAI_API_KEY or ANTHROPIC_API_KEY from env.  Falls back
-// to OpenAI.
+// For existing tools only (/api/llm/complete); new tools use the AI API above.
+// Uses ANTHROPIC_API_KEY if set, else OPENAI_API_KEY.
 
 function createLLMProvider(): LLMProvider {
   if (process.env["ANTHROPIC_API_KEY"]) {
@@ -113,11 +112,12 @@ function createLLMProvider(): LLMProvider {
   if (process.env["OPENAI_API_KEY"]) {
     return new OpenAIAdapter(process.env["OPENAI_API_KEY"]);
   }
-  // No key configured — use stub (OpenAI adapter still returns a canned response).
+  // No platform key: legacy requests fail with an authentication error, unless
+  // the browser sends its own key (X-Api-Key, see createLLMFromKey).
   console.warn(
-    "[PennTools] No LLM API key configured. Responses will be stubbed."
+    "[PennTools] Neither ANTHROPIC_API_KEY nor OPENAI_API_KEY is set — the legacy LLM API (/api/llm/complete) will fail without a browser-sent key."
   );
-  return new OpenAIAdapter("stub-key");
+  return new OpenAIAdapter("missing-key");
 }
 
 export const llm: LLMProvider = createLLMProvider();

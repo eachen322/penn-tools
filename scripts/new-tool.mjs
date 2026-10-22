@@ -226,7 +226,7 @@ writeFileSync(containerPath, containerLines.join(eol));
 console.log(`✔ Created ${title} at tools/${id}/ and /tools/${id}.
 
   Next:
-    pnpm install && pnpm build
+    pnpm install, then pnpm dev
     Build the tool with the platform APIs: see section 4 of CLAUDE.md, with
     AskPenn (tools/askpenn) and the Platform Playground (tools/platform-playground)
     as the reference tools.

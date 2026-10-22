@@ -4,9 +4,9 @@
 // Deprecated: kept unchanged for existing tools until they migrate. New tools
 // use the AI API (@penntools/core/ai). Delete this module once no tool uses it.
 //
-// All LLM interactions go through this interface. Adapters (OpenAI, Anthropic,
-// local) implement it in @penntools/platform.  Tools and chat routes import
-// only this interface — never a vendor SDK.
+// The legacy API (/api/llm/complete) goes through this interface. Adapters
+// (OpenAI, Anthropic) implement it in @penntools/platform; callers import only
+// this interface, never a vendor SDK.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Message types ─────────────────────────────────────────────────────────────
@@ -58,10 +58,7 @@ export interface LLMProvider {
    */
   complete(request: CompletionRequest): Promise<CompletionResponse>;
 
-  /**
-   * Streaming completion via async generator.
-   * Used by the chat UI for real-time token display.
-   */
+  /** Streaming completion via async generator. */
   stream(request: CompletionRequest): AsyncGenerator<StreamChunk>;
 
   /** Human-readable provider name, e.g. "openai" | "anthropic". */

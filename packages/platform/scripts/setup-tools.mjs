@@ -18,7 +18,7 @@
 //               up where it stopped.
 //
 // Runs as the second half of `db:deploy` (after `prisma db push`), which
-// Railway's pre-deploy step and scripts/test.sh both call. Connects as the
+// Railway's pre-deploy step and scripts/setup.sh both call. Connects as the
 // admin DATABASE_URL user; tool passwords are derived from it (see
 // src/db/toolDatabase.ts), so there is nothing to configure per tool.
 //
@@ -39,7 +39,7 @@ try {
 } catch (error) {
   // Only a missing build gets the build hint; any other failure is a real bug.
   if (error?.code !== "ERR_MODULE_NOT_FOUND") throw error;
-  console.error("Platform package is not built. Run `pnpm --filter @penntools/platform build` first.");
+  console.error("Platform package is not built. Run `pnpm turbo build --filter=@penntools/platform` first.");
   process.exit(1);
 }
 const { postgresConnectionUrl, toolDatabasePassword, toolDatabaseUrl } = toolDb;

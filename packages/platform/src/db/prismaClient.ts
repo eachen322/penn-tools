@@ -13,7 +13,7 @@ import { PrismaClient } from "@prisma/client";
 
 // Augment the Node global to hold the cached instance.
 declare global {
-  // eslint-disable-next-line no-var
+  // `var`, not `let`: only var declarations add a property to globalThis.
   var __prisma: PrismaClient | undefined;
 }
 

@@ -6,7 +6,7 @@ import { vi } from "vitest";
 export interface SentRequest {
   url: URL;
   headers: Headers;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // any: tests read whichever fields of the sent JSON they're checking.
   body: any;
 }
 

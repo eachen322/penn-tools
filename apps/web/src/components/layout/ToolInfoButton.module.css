@@ -10,7 +10,7 @@
   height: 32px;
   border: none;
   background: transparent;
-  color: var(--text-muted, #888);
+  color: var(--muted);
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.1s, color 0.1s;

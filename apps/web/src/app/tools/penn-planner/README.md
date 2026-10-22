@@ -32,7 +32,7 @@ cd ~/penn-tools
 git fetch origin
 git pull origin main
 pnpm install
-pnpm dev --concurrency=15
+pnpm dev
 ```
 
 Navigate to: `http://localhost:3000/tools/penn-planner`
@@ -48,7 +48,7 @@ To run from Krishna's branch:
 ```bash
 git fetch origin
 git checkout feat/estimation-effort-engine
-pnpm dev --concurrency=15
+pnpm dev
 ```
 
 ---

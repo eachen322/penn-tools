@@ -7,7 +7,7 @@
 │  apps/web  (Next.js)                                     │
 │   └─ route handlers → container.ts (DI root)             │
 │   └─ lib/auth.ts (Google sign-in, getCurrentUser)        │
-│   └─ React components → hooks → fetch()                  │
+│   └─ pages, server actions and routes (tool folders)     │
 ├──────────────────────────────────────────────────────────┤
 │  packages/platform  (reads env vars, constructs clients) │
 │   ├─ Prisma repositories                                 │
@@ -211,9 +211,13 @@ tool pages. It is a server component that calls `getCurrentUser()`:
   signs out and stays on the page.
 
 Pages that need a user render `SignInPrompt` for signed-out visitors instead of
-their content (`/settings` and AskPenn do). Because `getCurrentUser()` reads the
-request's cookies, every page renders per request rather than being prerendered;
-it is cached per request, so the header and the page share one user lookup.
+their content (`/settings`, AskPenn and the Platform Playground do). Tools that
+need a user for everything use the standard screens: `SignInPrompt` with just
+their title ("Sign in to use AskPenn."), and, if they run on the AI API,
+`ApiKeyPrompt` when the user hasn't saved a key, pointing to Settings. Because
+`getCurrentUser()` reads the request's cookies, every page renders per request
+rather than being prerendered; it is cached per request, so the header and the
+page share one user lookup.
 
 ### Page layout
 
@@ -237,9 +241,6 @@ For page authors this means:
 See `packages/platform/prisma/schema.prisma` for the canonical schema.
 
 Key design choices:
-- `tool_data` is unused: tools keep their data in their own schemas (below). The
-  model stays only because `prisma db push` would drop the table; remove it once
-  production's table is confirmed empty.
 - `user_api_keys` holds the OpenAI and Anthropic keys users save on `/settings`
   (at most one per provider), in plain text. Keys are checked with the provider
   before saving and never sent back to the browser; the page shows only the last

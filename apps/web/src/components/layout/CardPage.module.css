@@ -30,3 +30,8 @@
   color: var(--section-label);
   font-size: 0.875rem;
 }
+
+.link {
+  color: var(--penn-blue);
+  text-decoration: underline;
+}

@@ -5,28 +5,20 @@ AI-powered tools for the Penn community, built as a Next.js monorepo. Each tool 
 ## Quick start
 
 ```bash
-bash scripts/test.sh
+bash scripts/setupAndRun.sh
 ```
 
-The setup script handles everything: installs dependencies, builds packages, spins up a Postgres container via Docker, applies the database schema, runs tests, builds the web app, and starts the dev server at **http://localhost:3000**.
+This runs the setup script, `scripts/setup.sh`, then starts the dev server at **http://localhost:3000**. The setup script starts a Postgres container in Docker, installs dependencies, builds the packages, creates `apps/web/.env.local` and applies the database schema; it's safe to re-run. Run `bash scripts/setup.sh` on its own to set up without starting the server, then `pnpm dev` when you're ready.
 
 ### Prerequisites
 
 | Tool | Min version | Install |
 |---|---|---|
-| Node.js | 20 | https://nodejs.org |
+| Node.js | 20.12 | https://nodejs.org |
 | pnpm | 9 | `npm install -g pnpm` |
 | Docker | any | https://docs.docker.com/get-docker |
 
-The app needs Postgres. Docker is optional — without it, use any Postgres with the `vector` extension, set its URL as `DATABASE_URL` in `apps/web/.env.local`, and run:
-
-```bash
-pnpm install
-pnpm --filter @penntools/platform build
-# db:deploy doesn't read .env.local, so pass the URL on the command line
-DATABASE_URL="<url>" pnpm --filter @penntools/platform db:deploy
-pnpm dev
-```
+The app needs Postgres (with the `vector` extension), and locally it runs in Docker: the setup script starts it for you.
 
 Locally, you don't need Google credentials: without them, **Sign in** logs you in as a local development user.
 
@@ -40,7 +32,7 @@ Copy `.env.example` to `apps/web/.env.local` (the setup script does this automat
 OPENAI_API_KEY=""
 ANTHROPIC_API_KEY=""
 
-# Auto-filled by test.sh if Docker is available
+# Filled in by setup.sh: the local Docker Postgres
 DATABASE_URL="postgresql://penntools:penntools@localhost:5432/penntools"
 
 # Optional locally — Google sign-in (see .env.example)
@@ -63,8 +55,10 @@ tools/
   ...
 docs/
   ARCHITECTURE.md             Architecture decisions and conventions
+  RAILWAY.md                  Standing up a Railway instance
 scripts/
-  test.sh                     One-shot dev setup
+  setup.sh                    One-shot dev setup
+  setupAndRun.sh              Dev setup, then start the dev server
   new-tool.mjs                Scaffold a new tool (pnpm new-tool)
 CLAUDE.md                     Rules for contributors and their coding agents
 ```
@@ -77,16 +71,19 @@ pnpm test                                     # run all tests
 pnpm --filter @penntools/tool-askpenn test    # run one package's tests
 pnpm build                                    # production build
 pnpm typecheck                                # TypeScript check
-pnpm lint                                     # ESLint
 pnpm check:tools                              # tool code follows the platform rules (no vendor SDKs or key access)
 pnpm new-tool                                 # scaffold a new tool (see Adding a tool)
 
-pnpm --filter @penntools/platform db:deploy   # apply schema changes + tool databases
+# Apply schema changes + tool databases. db:deploy doesn't read .env.local, so pass the URL
+# (this one is the local Docker Postgres that setup.sh starts):
+DATABASE_URL="postgresql://penntools:penntools@localhost:5432/penntools" pnpm --filter @penntools/platform db:deploy
 ```
 
 ## Deploying
 
-The app runs on [Railway](https://railway.com). Railway has deprecated Config as Code (`railway.json`), so these commands are set by hand on the app service (**Settings → Deploy**):
+The app runs on [Railway](https://railway.com). To stand up a new instance, for example from your team's branch for beta testers, follow [docs/RAILWAY.md](docs/RAILWAY.md). You don't need one to build or test a tool: the local dev server covers that.
+
+Railway has deprecated Config as Code (`railway.json`), so these commands are set by hand on the app service (**Settings → Deploy**):
 
 | Setting | Value | Why it's needed |
 |---|---|---|

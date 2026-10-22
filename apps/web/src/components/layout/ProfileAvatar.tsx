@@ -14,7 +14,6 @@ export function ProfileAvatar({
 
   if (image) {
     // Plain <img>: Google avatar URLs would otherwise need next/image domain config.
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={image} alt="" className={styles.avatar} style={dimensions} referrerPolicy="no-referrer" />;
   }
 

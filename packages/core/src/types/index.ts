@@ -35,23 +35,3 @@ export interface SavedApiKey {
   last4: string;
   updatedAt: Date;
 }
-
-// ── Tool data ────────────────────────────────────────────────────────────────
-
-export type ToolDataId = string;
-
-/**
- * Generic key-value store scoped to (userId, toolId).
- * json_value allows each tool to store arbitrary structured data without
- * needing its own table in early iterations.
- */
-export interface ToolData {
-  id: ToolDataId;
-  userId: UserId;
-  toolId: string;
-  key: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jsonValue: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-}

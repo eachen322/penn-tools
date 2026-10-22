@@ -40,7 +40,6 @@ model User {
   /// UPenn identifier (pennid / eppn), reserved for Penn SSO.
   pennId    String?  @unique @map("penn_id")
 
-  toolData  ToolData[]
   apiKeys   UserApiKey[]
 
   @@map("users")
@@ -69,25 +68,4 @@ model UserApiKey {
 enum ApiKeyProvider {
   OPENAI
   ANTHROPIC
-}
-
-// ── Tool data ─────────────────────────────────────────────────────────────────
-
-/// Unused: tools keep data in their own schemas now (see setup-tools.mjs).
-/// Kept only because `prisma db push` would drop the table, and refuses to when
-/// it has rows. Remove this model once production's tool_data is confirmed empty.
-model ToolData {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  toolId    String   @map("tool_id")
-  key       String
-  jsonValue Json     @map("json_value")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, toolId, key])
-  @@index([userId, toolId])
-  @@map("tool_data")
 }
