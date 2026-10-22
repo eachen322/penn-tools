@@ -20,7 +20,10 @@
   width: 100%;
 }
 
+/* At least the height of the page area, so a full-height layout can fill it
+   with position: absolute; inset: 0 (as AskPenn does). */
 .contentFullBleed {
+  position: relative;
   max-width: none;
   padding: 0;
 }

@@ -9,5 +9,6 @@ export class AskPennTool extends Tool {
     contributors: ["Platform team"],
     category: "Platform",
     beta: true,
+    fullWidth: true,
   };
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { ToolCategory, ToolManifest } from "@penntools/core/tools";
 import type { CommunityTool } from "../../data/communityTools";
-import { toolCatalog } from "../toolCatalog";
+import { fullWidthToolIds, toolCatalog } from "../toolCatalog";
 
 function manifest(id: string, category: ToolCategory, flags: Partial<ToolManifest> = {}): ToolManifest {
   return { id, title: id, description: "", contributors: [], category, ...flags };
@@ -75,5 +75,18 @@ describe("toolCatalog", () => {
       ["https://q.example", true],
       ["/tools/a", false],
     ]);
+  });
+});
+
+describe("fullWidthToolIds", () => {
+  it("lists only the tools whose manifest sets fullWidth", () => {
+    expect(
+      fullWidthToolIds([
+        manifest("chat", "Platform", { fullWidth: true }),
+        manifest("column", "LLM Tools"),
+        manifest("explicit", "LLM Tools", { fullWidth: false }),
+        manifest("canvas", "LLM Tools", { fullWidth: true }),
+      ]),
+    ).toEqual(["chat", "canvas"]);
   });
 });

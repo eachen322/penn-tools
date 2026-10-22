@@ -60,6 +60,7 @@ scripts/
   setup.sh                    One-shot dev setup
   setupAndRun.sh              Dev setup, then start the dev server
   new-tool.mjs                Scaffold a new tool (pnpm new-tool)
+  check-tool-imports.mjs      Check tool code against the platform rules (pnpm check:tools)
 CLAUDE.md                     Rules for contributors and their coding agents
 ```
 
@@ -71,7 +72,7 @@ pnpm test                                     # run all tests
 pnpm --filter @penntools/tool-askpenn test    # run one package's tests
 pnpm build                                    # production build
 pnpm typecheck                                # TypeScript check
-pnpm check:tools                              # tool code follows the platform rules (no vendor SDKs or key access)
+pnpm check:tools                              # tool code follows the platform rules (no vendor SDKs or key access; notYetMigrated matches legacy API use)
 pnpm new-tool                                 # scaffold a new tool (see Adding a tool)
 
 # Apply schema changes + tool databases. db:deploy doesn't read .env.local, so pass the URL

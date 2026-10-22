@@ -3,12 +3,9 @@
 
 import { toolRegistry } from "@penntools/core/tools";
 import "@/lib/container"; // registers the tools
+import { fullWidthToolIds } from "@/lib/toolCatalog";
 import { ToolsShell } from "@/components/layout/ToolsShell";
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
-  const fullWidth = toolRegistry
-    .listManifests()
-    .filter((m) => m.fullWidth)
-    .map((m) => m.id);
-  return <ToolsShell fullWidth={fullWidth}>{children}</ToolsShell>;
+  return <ToolsShell fullWidth={fullWidthToolIds(toolRegistry.listManifests())}>{children}</ToolsShell>;
 }

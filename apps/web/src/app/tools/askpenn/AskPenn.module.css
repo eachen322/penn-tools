@@ -1,6 +1,7 @@
-/* Fills the area under the site header (position: fixed is relative to it). */
+/* Fills the page area exactly: AskPenn's manifest sets fullWidth, whose page
+   area is position: relative, and the chat scrolls inside it. */
 .shell {
-  position: fixed;
+  position: absolute;
   inset: 0;
   display: flex;
   overflow: hidden;

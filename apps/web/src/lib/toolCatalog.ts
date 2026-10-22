@@ -68,6 +68,11 @@ function fromManifest(m: ToolManifest): CatalogTool {
   };
 }
 
+/** IDs of the tools whose manifest sets fullWidth, for the tools layout. */
+export function fullWidthToolIds(manifests: readonly ToolManifest[]): string[] {
+  return manifests.filter((m) => m.fullWidth === true).map((m) => m.id);
+}
+
 /** The catalog's sections, leaving out empty ones. */
 export function toolCatalog(
   manifests: readonly ToolManifest[],

@@ -132,8 +132,9 @@ toolRegistry.register(new AskPennTool());
 ```
 
 The registry only holds manifests: the root layout and the home page read it for
-the site sidebar and the dashboard (see **Tool catalog** below), and `/api/tools`
-serves it to the tool pages' info button. A tool does its work
+the site sidebar and the dashboard (see **Tool catalog** below), the tools layout
+reads which tools are full-width (see **Page layout**), and `/api/tools` serves it
+to the tool pages' info button. A tool does its work
 from its own pages, routes and server actions.
 
 ---
@@ -275,13 +276,17 @@ For page authors this means:
   description and contributors) in the top-right corner. A tool whose manifest
   sets `fullWidth: true` fills the whole page area instead and has no info button,
   since a full-width page usually has its own header there. The tools layout
-  (`apps/web/src/app/tools/layout.tsx`) reads that from the manifests.
+  (`apps/web/src/app/tools/layout.tsx`) reads that from the manifests. Career
+  Canvas and AskPenn are full-width. A full-width page area is `position:
+  relative` and at least as tall as the space, so a layout that should fill it
+  exactly, such as AskPenn's chat, uses `position: absolute; inset: 0`. Don't
+  break out of the column with CSS instead.
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`;
   `100vh` is taller than the space under the header and adds a scrollbar.
 - `position: fixed` is relative to the page's area, not the window
-  (`.app-viewport` uses `contain: layout`). A full-screen container pinned with
-  `top: 0 … bottom: 0` fills that area instead of covering the header and
-  sidebar, and fixed modals and toasts stay in place while the page scrolls.
+  (`.app-viewport` uses `contain: layout`), so fixed modals and toasts cover the
+  page but not the header or sidebar, and stay in place while the page scrolls.
+  Use `fullWidth`, not `position: fixed`, to make a page fill the area.
 - Size full-width layouts with `width: 100%`, not `100vw`. `100vw` is the whole
   window, so with the sidebar open it's wider than the page: it adds a horizontal
   scrollbar and pushes content out of view. The page's width also changes when
