@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { isPennEmail } from "../pennEmail";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { isPennEmail, PENN_ONLY_PAGE } from "../pennEmail";
+
+describe("PENN_ONLY_PAGE", () => {
+  it("is a page that exists, so turned-away users don't land on a 404", () => {
+    const page = new URL(`../../app${PENN_ONLY_PAGE}/page.tsx`, import.meta.url);
+    expect(existsSync(fileURLToPath(page)), fileURLToPath(page)).toBe(true);
+  });
+});
 
 describe("isPennEmail", () => {
   it("accepts upenn.edu and Penn schools' subdomains, in any case", () => {

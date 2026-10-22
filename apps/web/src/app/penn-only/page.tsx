@@ -1,6 +1,7 @@
-// Where sign-in sends a Google account that isn't a Penn one (see the signIn
-// callback in lib/auth.ts). Signing in again from here comes back here, so a
-// signed-in visitor goes on to the home page.
+// Where sign-in sends a Google account that isn't a Penn one (PENN_ONLY_PAGE in
+// lib/pennEmail.ts, used by the signIn callback in lib/auth.ts). Signing in
+// again from here comes back here, so a signed-in visitor goes on to the home
+// page.
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";

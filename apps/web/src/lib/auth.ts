@@ -25,10 +25,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { Provider } from "next-auth/providers/index";
 import type { User } from "@penntools/core/types";
 import { users, logger } from "./container";
-import { isPennEmail } from "./pennEmail";
-
-/** Where sign-in sends a Google account that isn't a Penn one. */
-export const PENN_ONLY_PAGE = "/penn-only";
+import { isPennEmail, PENN_ONLY_PAGE } from "./pennEmail";
 
 declare module "next-auth" {
   interface Session {
