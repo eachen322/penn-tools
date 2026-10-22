@@ -118,6 +118,23 @@ test("rejects an ID that's already taken", (t) => {
   assert.match(result.stderr, /already exists/);
 });
 
+test("rejects a retired ID that next.config.mjs redirects, and only that one", (t) => {
+  const redirects = (source) =>
+    `export default { async redirects() { return [{ source: "${source}", destination: "/tools/other", permanent: true }]; } };\n`;
+  for (const source of ["/tools/course-finder", "/tools/course-finder/:path*"]) {
+    const r = repo(t);
+    writeFileSync(join(r.root, "apps/web/next.config.mjs"), redirects(source));
+    const result = r.run(...ARGS);
+    assert.equal(result.status, 1, `${source} should block the ID`);
+    assert.match(result.stderr, /\/tools\/course-finder redirects elsewhere/);
+    assert.equal(r.exists("tools/course-finder"), false);
+  }
+  // A redirect for a longer ID that starts the same doesn't count.
+  const r = repo(t);
+  writeFileSync(join(r.root, "apps/web/next.config.mjs"), redirects("/tools/course-finder-old"));
+  assert.equal(r.run(...ARGS).status, 0);
+});
+
 test("names missing options instead of asking, when not run in a terminal", (t) => {
   const r = repo(t);
   const result = r.run("--id", "course-finder", "--yes");

@@ -84,6 +84,16 @@ const pageDir = join(root, "apps", "web", "src", "app", "tools", id);
 for (const dir of [toolDir, pageDir]) {
   if (existsSync(dir)) fail(`${dir.slice(root.length + 1)} already exists. Pick another tool ID.`);
 }
+// A retired tool's URL redirects elsewhere (see next.config.mjs), and the
+// redirect runs before any page, so a new tool there would be unreachable.
+const nextConfigPath = join(root, "apps", "web", "next.config.mjs");
+if (existsSync(nextConfigPath)) {
+  const nextConfig = readFileSync(nextConfigPath, "utf8");
+  const redirected = [...nextConfig.matchAll(/source:\s*["'`]\/tools\/([a-z0-9-]+)(?=[/"'`])/g)].map((m) => m[1]);
+  if (redirected.includes(id)) {
+    fail(`/tools/${id} redirects elsewhere (apps/web/next.config.mjs): the ID belonged to a tool that was renamed or removed. Pick another tool ID.`);
+  }
+}
 
 const words = id.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join("");
 const className = `${words}Tool`;

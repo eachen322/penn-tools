@@ -47,7 +47,7 @@ If a user requests a change outside their scope, explain the boundary politely a
 
 When the user says "Register new team", collect these inputs one at a time:
 
-1. **Tool ID** — a short name in lowercase words joined by hyphens, e.g. `course-finder`. It becomes the page URL (`/tools/course-finder`), the package name and the class name (`CourseFinderTool`), so check that `tools/{id}/` doesn't already exist
+1. **Tool ID** — a short name in lowercase words joined by hyphens, e.g. `course-finder`. It becomes the page URL (`/tools/course-finder`), the package name and the class name (`CourseFinderTool`), so check that `tools/{id}/` doesn't already exist and that the ID isn't retired (`apps/web/next.config.mjs` redirects a retired tool's URL elsewhere); the scaffold refuses both
 2. **Tool title** — human-readable, e.g. `"Course Finder"`
 3. **Short description** — one sentence
 4. **Contributors** — comma-separated names
