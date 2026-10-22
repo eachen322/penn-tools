@@ -66,8 +66,8 @@ Each tool ships with:
 
 The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
 tool's title, description, contributors, category and status. The site sidebar and
-the dashboard list it under its category, and the info button on its page shows the
-rest:
+the dashboard list it under its category, and on its pages the site header shows its
+title, with an info button for the rest:
 
 ```ts
 export class AskPennTool extends Tool {
@@ -79,8 +79,7 @@ export class AskPennTool extends Tool {
     category: "Platform", // one of TOOL_CATEGORIES in @penntools/core/tools
     beta: true,           // shown as BETA
     fullWidth: true,      // fill the page area, not the 720px column (see Page layout)
-    // and optionally a mentor, hideInfoButton (see Page layout) and
-    // notYetMigrated (below)
+    // and optionally a mentor, and notYetMigrated (below)
   };
 }
 ```
@@ -134,11 +133,11 @@ toolRegistry.register(new AskPennTool());
 
 The registry only holds manifests, and only server code reads it: the root layout
 and the home page for the site sidebar and the dashboard (see **Tool catalog**
-below), and the tools layout (`apps/web/src/app/tools/layout.tsx`) for each tool's
-pages: whether they're full-width (see **Page layout**) and the details the info
-button shows, which it passes down as `ToolPageInfo` so the browser never gets
-whole manifests. A tool does its work from its own pages, routes and server
-actions.
+below), the site header for the current tool's name and info button (it passes
+down only those details, as `ToolInfo`, so the browser never gets whole
+manifests), and the tools layout (`apps/web/src/app/tools/layout.tsx`) for which
+tools are full-width (see **Page layout**). A tool does its work from its own
+pages, routes and server actions.
 
 ---
 
@@ -206,7 +205,11 @@ The root layout (`apps/web/src/app/layout.tsx`) renders `SiteHeader`
 tool pages. It is a server component that calls `getCurrentUser()`:
 
 - **Left:** the hamburger that hides or shows the site sidebar, then the
-  Wharton AI Club logo and "PennTools", linking to the home page.
+  Wharton AI Club logo and "PennTools", linking to the home page. On a tool's
+  pages, then "/" and the tool's name, linking to its main page, and the info
+  button, which opens its description, contributors and mentor (`HeaderTool`).
+  It's in the header so it can't cover anything a tool draws. On phones only
+  the info button shows; the popover names the tool.
 - **Right, always:** a **GitHub** link to the repository, before the sign-in
   controls below.
 - **Signed out:** a **Sign in** button. It signs in with the provider in
@@ -275,16 +278,13 @@ Below the header and beside the sidebar, every page renders inside
 (styles in `apps/web/src/app/globals.css`).
 For page authors this means:
 
-- Tool pages sit in a centered 720px column, with the info button (the tool's
-  description and contributors) in the top-right corner. A tool whose manifest
-  sets `fullWidth: true` fills the whole page area instead, and keeps the info
-  button; one whose own header has something in that corner also sets
-  `hideInfoButton: true`. The tools layout (`apps/web/src/app/tools/layout.tsx`)
-  reads both from the manifests. Career Canvas and AskPenn are full-width, and
-  Career Canvas hides the button, since its header has My Profile there. A full-width page area is `position:
-  relative` and at least as tall as the space, so a layout that should fill it
-  exactly, such as AskPenn's chat, uses `position: absolute; inset: 0`. Don't
-  break out of the column with CSS instead.
+- Tool pages sit in a centered 720px column. A tool whose manifest sets
+  `fullWidth: true` fills the whole page area instead, as Career Canvas and
+  AskPenn do; the tools layout (`apps/web/src/app/tools/layout.tsx`) reads that
+  from the manifests. A full-width page area is `position: relative` and at least
+  as tall as the space, so a layout that should fill it exactly, such as AskPenn's
+  chat, uses `position: absolute; inset: 0`. Don't break out of the column with
+  CSS instead.
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`;
   `100vh` is taller than the space under the header and adds a scrollbar.
 - `position: fixed` is relative to the page's area, not the window

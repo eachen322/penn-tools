@@ -1,13 +1,13 @@
 "use client";
 
-// The info button in the corner of a tool's pages: opens the tool's
-// description, contributors and mentor, which ToolsShell passes in.
+// The info button after a tool's name in the site header: opens the tool's
+// description, contributors and mentor, which HeaderTool passes in.
 
 import { useState } from "react";
-import type { ToolPageInfo } from "@/lib/toolCatalog";
+import type { ToolInfo } from "@/lib/toolCatalog";
 import styles from "./ToolInfoButton.module.css";
 
-export function ToolInfoButton({ tool }: { tool: ToolPageInfo }) {
+export function ToolInfoButton({ tool }: { tool: ToolInfo }) {
   const [open, setOpen] = useState(false);
 
   return (

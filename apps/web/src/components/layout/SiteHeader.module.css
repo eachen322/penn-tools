@@ -14,6 +14,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   margin-left: -8px; /* line the menu icon up with the page's left edge */
 }
 
@@ -34,6 +35,37 @@
   border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
+}
+
+/* The current tool's name and info button, after PennTools (HeaderTool). */
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.separator {
+  color: var(--border);
+  font-size: 1.15rem;
+}
+
+.toolName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.toolName:hover { text-decoration: underline; }
+
+/* On phones, keep just the info button: the popover names the tool. */
+@media (max-width: 600px) {
+  .separator,
+  .toolName { display: none; }
 }
 
 .actions {

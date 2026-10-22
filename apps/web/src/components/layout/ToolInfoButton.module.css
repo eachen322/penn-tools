@@ -27,10 +27,12 @@
   z-index: 10;
 }
 
+/* Just under the header's left edge, so it stays on-screen wherever the button
+   is. The header is outside .app-viewport, so fixed is relative to the window. */
 .popup {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
+  top: calc(var(--header-height) + 6px);
+  left: 12px;
   z-index: 11;
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -38,7 +40,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 16px 20px;
   min-width: 260px;
-  max-width: min(360px, calc(100vw - 32px));
+  max-width: min(360px, calc(100vw - 24px));
   display: flex;
   flex-direction: column;
   gap: 12px;

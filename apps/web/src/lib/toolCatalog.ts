@@ -69,34 +69,29 @@ function fromManifest(m: ToolManifest): CatalogTool {
 }
 
 /**
- * What a tool's pages need from its manifest: the info button's details, and
- * whether the page is full-width and shows the button. Only these go to the
- * browser, not the whole manifest.
+ * What the site header shows for the current tool: its name, and the info
+ * button's details. Only these go to the browser, not the whole manifest.
  */
-export interface ToolPageInfo {
+export interface ToolInfo {
   title: string;
   description: string;
   contributors: string[];
   mentor: string | null;
-  fullWidth: boolean;
-  hideInfoButton: boolean;
 }
 
-/** Each registered tool's ToolPageInfo, by tool ID, for the tools layout. */
-export function toolPageInfo(manifests: readonly ToolManifest[]): Record<string, ToolPageInfo> {
+/** Each registered tool's ToolInfo, by tool ID, for the site header. */
+export function toolInfo(manifests: readonly ToolManifest[]): Record<string, ToolInfo> {
   return Object.fromEntries(
     manifests.map((m) => [
       m.id,
-      {
-        title: m.title,
-        description: m.description,
-        contributors: m.contributors,
-        mentor: m.mentor || null,
-        fullWidth: m.fullWidth === true,
-        hideInfoButton: m.hideInfoButton === true,
-      },
+      { title: m.title, description: m.description, contributors: m.contributors, mentor: m.mentor || null },
     ]),
   );
+}
+
+/** IDs of the tools whose manifest sets fullWidth, for the tools layout. */
+export function fullWidthToolIds(manifests: readonly ToolManifest[]): string[] {
+  return manifests.filter((m) => m.fullWidth === true).map((m) => m.id);
 }
 
 /** The catalog's sections, leaving out empty ones. */

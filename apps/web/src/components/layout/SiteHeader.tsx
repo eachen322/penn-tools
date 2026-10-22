@@ -1,10 +1,15 @@
-// Site-wide header: the sidebar's hamburger, logo and PennTools on the left;
-// the GitHub link, then sign-in or the profile icon (to account settings) and
-// log out, on the right. Rendered by the root layout.
+// Site-wide header: the sidebar's hamburger, logo and PennTools on the left,
+// then, on a tool's pages, the tool's name and info button; the GitHub link,
+// then sign-in or the profile icon (to account settings) and log out, on the
+// right. Rendered by the root layout.
 
 import Link from "next/link";
+import { toolRegistry } from "@penntools/core/tools";
+import "@/lib/container"; // registers the tools
 import { getCurrentUser, signInProvider } from "@/lib/auth";
+import { toolInfo } from "@/lib/toolCatalog";
 import { SignInButton, SignOutButton } from "./AuthButtons";
+import { HeaderTool } from "./HeaderTool";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { SidebarToggle } from "./SiteSidebar";
 import styles from "./SiteHeader.module.css";
@@ -20,6 +25,7 @@ export async function SiteHeader() {
           <img src="/wharton-ai-club-logo.png" alt="" className={styles.logo} />
           PennTools
         </Link>
+        <HeaderTool tools={toolInfo(toolRegistry.listManifests())} />
       </div>
 
       <div className={styles.actions}>

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { ToolCategory, ToolManifest } from "@penntools/core/tools";
 import type { CommunityTool } from "../../data/communityTools";
-import { toolCatalog, toolPageInfo } from "../toolCatalog";
+import { fullWidthToolIds, toolCatalog, toolInfo } from "../toolCatalog";
 
 function manifest(id: string, category: ToolCategory, flags: Partial<ToolManifest> = {}): ToolManifest {
   return { id, title: id, description: "", contributors: [], category, ...flags };
@@ -78,37 +78,26 @@ describe("toolCatalog", () => {
   });
 });
 
-describe("toolPageInfo", () => {
-  it("sets full width and the info button from their own manifest fields, independently", () => {
-    const info = toolPageInfo([
-      manifest("chat", "Platform", { fullWidth: true }),
-      manifest("canvas", "LLM Tools", { fullWidth: true, hideInfoButton: true }),
-      manifest("column", "LLM Tools"),
-      manifest("bare", "LLM Tools", { hideInfoButton: true }),
-      manifest("explicit", "LLM Tools", { fullWidth: false, hideInfoButton: false }),
-    ]);
-    expect(Object.fromEntries(Object.entries(info).map(([id, t]) => [id, [t.fullWidth, t.hideInfoButton]]))).toEqual({
-      chat: [true, false],
-      canvas: [true, true],
-      column: [false, false],
-      bare: [false, true],
-      explicit: [false, false],
-    });
-  });
-
-  it("passes the info button's details, and nothing private like notYetMigrated", () => {
-    const info = toolPageInfo([
+describe("toolInfo", () => {
+  it("passes the header's details, and nothing private like notYetMigrated", () => {
+    const info = toolInfo([
       manifest("a", "LLM Tools", { title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace", notYetMigrated: true }),
       manifest("b", "LLM Tools", { mentor: "" }),
     ]);
-    expect(info["a"]).toEqual({
-      title: "A",
-      description: "Does A.",
-      contributors: ["Ada"],
-      mentor: "Grace",
-      fullWidth: false,
-      hideInfoButton: false,
-    });
+    expect(info["a"]).toEqual({ title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace" });
     expect(info["b"]?.mentor).toBeNull();
+  });
+});
+
+describe("fullWidthToolIds", () => {
+  it("lists only the tools whose manifest sets fullWidth", () => {
+    expect(
+      fullWidthToolIds([
+        manifest("chat", "Platform", { fullWidth: true }),
+        manifest("column", "LLM Tools"),
+        manifest("explicit", "LLM Tools", { fullWidth: false }),
+        manifest("canvas", "LLM Tools", { fullWidth: true }),
+      ]),
+    ).toEqual(["chat", "canvas"]);
   });
 });
