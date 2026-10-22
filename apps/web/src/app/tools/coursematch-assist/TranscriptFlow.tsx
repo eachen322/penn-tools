@@ -26,7 +26,7 @@ type View = "upload" | "processing" | "review" | "confirm";
 const PDFJS_VERSION = "3.11.174";
 
 async function loadPdfJs(): Promise<PDFJSLib> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // PDF.js comes from a CDN script tag, so window has no type for it.
   const win = window as any;
   if (win.pdfjsLib) return win.pdfjsLib as PDFJSLib;
   await new Promise<void>((resolve, reject) => {
@@ -36,8 +36,7 @@ async function loadPdfJs(): Promise<PDFJSLib> {
     script.onerror = () => reject(new Error("Failed to load PDF.js from CDN"));
     document.head.appendChild(script);
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lib = (window as any).pdfjsLib as PDFJSLib;
+  const lib = win.pdfjsLib as PDFJSLib;
   lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
   return lib;
 }

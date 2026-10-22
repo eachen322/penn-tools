@@ -257,7 +257,7 @@ export function DiscoverDeck({ events, savedEventIds, savingEventId, onSave, onD
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [current, exitDir]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [current, exitDir]); // Deliberately re-binds only when the card or exit direction changes.
 
   const isSaving = current ? savingEventId === current.id : false;
 

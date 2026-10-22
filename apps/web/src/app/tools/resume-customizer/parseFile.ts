@@ -225,7 +225,6 @@ async function parsePDF(file: File): Promise<string> {
     // Each item has a transform matrix: [scaleX, skewX, skewY, scaleY, x, y]
     // We group items that share the same y-coordinate into a single line,
     // then sort lines top-to-bottom (PDF y-axis is bottom-up, so higher y = higher on page).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const items = content.items as Array<{ str: string; transform: number[] }>;
 
     // Sort: descending y (top of page first), then ascending x (left to right)

@@ -14,7 +14,6 @@ import type { SavedCourse } from "./transcriptPersistence";
 import type { BidGuidance } from "@penntools/tool-coursematch-assist/track4";
 import { buildCourseCatalog } from "@penntools/tool-coursematch-assist/track3";
 import type { ShortlistItem } from "@penntools/tool-coursematch-assist/track3";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import rawSections from "../../../../../../tools/coursematch-assist/course-match-static/_sections_raw.json";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -181,8 +180,7 @@ export function WizardClient({
   // ── Step 6: build ShortlistItem[] from IDs ─────────────────────────────────
 
   const schedulerShortlist = useMemo((): ShortlistItem[] => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const catalog = buildCourseCatalog(rawSections as any);
+    const catalog = buildCourseCatalog(rawSections as Parameters<typeof buildCourseCatalog>[0]);
     return shortlistedIds.flatMap((courseId) => {
       const normalized = courseId.replace(/\s+/g, " ").trim();
       const group = catalog.find((g) =>
@@ -473,8 +471,7 @@ function ShortlistStep({
   });
 
   // Show suggestions + search results
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CATALOG_ALL = Array.from((CATALOG_BY_ID as Map<string, any>).entries()).map(([id, e]) => ({ courseId: id, title: e.title as string, department: e.department as string }));
+  const CATALOG_ALL = Array.from(CATALOG_BY_ID.entries()).map(([id, e]) => ({ courseId: id, title: e.title, department: e.department }));
   const searchResults = search.trim().length >= 2
     ? CATALOG_ALL.filter((c) =>
         c.courseId.toLowerCase().includes(search.toLowerCase()) ||

@@ -302,7 +302,7 @@ function HeroAnimation() {
     };
     t = setTimeout(() => step(0), 500);
     return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Deliberately restarts only when cycle changes; the timers drive the rest.
   }, [cycle]);
 
   return (
@@ -768,7 +768,7 @@ function GeneratingScreen({ baseResume, jobDescription, allFiles, onDone }: {
     llmComplete(prompt)
       .then(content => onDone(content))
       .catch(err => setError(err instanceof Error ? err.message : String(err)));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Deliberately runs once, on mount.
   }, []);
 
   return (

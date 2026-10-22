@@ -28,7 +28,7 @@ The tool uses an AI model to generate tailored resumes. You need to provide an A
 pnpm --filter @penntools/web dev
 ```
 
-Then open **[http://localhost:3000/tools/7](http://localhost:3000/tools/resume-customizer)** in your browser.
+Then open **[http://localhost:3000/tools/resume-customizer](http://localhost:3000/tools/resume-customizer)** in your browser.
 
 ---
 

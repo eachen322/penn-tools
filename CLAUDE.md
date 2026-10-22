@@ -153,6 +153,8 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 | DB / AI implementations | `packages/platform/` | Platform team |
 | Web app + API routes | `apps/web/src/` | Platform team |
 | Tool registration | `apps/web/src/lib/container.ts` | `pnpm new-tool` writes it; otherwise the Platform team |
+| Tool categories (sidebar and dashboard sections) | `TOOL_CATEGORIES` in `packages/core/src/tools/Tool.ts` | Platform team; a tool team picks one in its manifest |
+| Community tools (apps outside this repo) | `apps/web/src/data/communityTools.ts` | Platform team |
 | Tool landing pages | `apps/web/src/app/tools/{id}/` | That tool's team |
 | Tool implementations | `tools/{id}/` | That tool's team |
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { CatalogSection, CatalogTool } from "@/lib/toolCatalog";
 import styles from "./Dashboard.module.css";
 
@@ -53,16 +54,9 @@ export function Dashboard({ sections }: { sections: CatalogSection[] }) {
 function ToolTile({ tool }: { tool: CatalogTool }) {
   // Tools without a captured screenshot keep the plain tile.
   const [hasPreview, setHasPreview] = useState(true);
-  const external = tool.external
-    ? { target: "_blank", rel: "noopener noreferrer" }
-    : {};
 
-  return (
-    <a
-      href={tool.href}
-      className={styles.tile}
-      {...external}
-    >
+  const content = (
+    <>
       {hasPreview && (
         <div className={styles.tilePreview}>
           <img
@@ -93,6 +87,18 @@ function ToolTile({ tool }: { tool: CatalogTool }) {
           </span>
         </div>
       </div>
+    </>
+  );
+
+  // Community tools open in a new tab; registered tools navigate within the app,
+  // as the sidebar's links do, so the page doesn't fully reload.
+  return tool.external ? (
+    <a href={tool.href} className={styles.tile} target="_blank" rel="noopener noreferrer">
+      {content}
     </a>
+  ) : (
+    <Link href={tool.href} className={styles.tile}>
+      {content}
+    </Link>
   );
 }
