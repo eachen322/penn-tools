@@ -1,23 +1,14 @@
-"use client";
+// Layout for every tool page: the info button in the corner and a centered
+// 720px column, or the whole page area for tools whose manifest sets fullWidth.
 
-import { useSelectedLayoutSegment } from "next/navigation";
-import { ToolInfoButton } from "@/components/layout/ToolInfoButton";
-import styles from "./layout.module.css";
+import { toolRegistry } from "@penntools/core/tools";
+import "@/lib/container"; // registers the tools
+import { ToolsShell } from "@/components/layout/ToolsShell";
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
-  const segment = useSelectedLayoutSegment();
-  const isCareerCanvas = segment === "career-canvas";
-
-  return (
-    <div className={styles.container}>
-      {!isCareerCanvas && (
-        <div className={styles.infoCorner}>
-          <ToolInfoButton />
-        </div>
-      )}
-      <main className={isCareerCanvas ? `${styles.content} ${styles.contentFullBleed}` : styles.content}>
-        {children}
-      </main>
-    </div>
-  );
+  const fullWidth = toolRegistry
+    .listManifests()
+    .filter((m) => m.fullWidth)
+    .map((m) => m.id);
+  return <ToolsShell fullWidth={fullWidth}>{children}</ToolsShell>;
 }

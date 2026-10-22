@@ -15,6 +15,7 @@ export class CareerCanvasTool extends Tool {
     ],
     mentor: "Itay Zitvar",
     category: "LLM Tools",
+    fullWidth: true,
     notYetMigrated: true,
   };
 }

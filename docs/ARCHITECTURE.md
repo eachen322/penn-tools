@@ -78,6 +78,7 @@ export class AskPennTool extends Tool {
     contributors: ["Platform team"],
     category: "Platform", // one of TOOL_CATEGORIES in @penntools/core/tools
     beta: true,           // shown as BETA
+    // fullWidth: true,   // fill the page area, not the 720px column (see Page layout)
     // and optionally a mentor, and notYetMigrated (below)
   };
 }
@@ -270,6 +271,11 @@ Below the header and beside the sidebar, every page renders inside
 (styles in `apps/web/src/app/globals.css`).
 For page authors this means:
 
+- Tool pages sit in a centered 720px column, with the info button (the tool's
+  description and contributors) in the top-right corner. A tool whose manifest
+  sets `fullWidth: true` fills the whole page area instead and has no info button,
+  since a full-width page usually has its own header there. The tools layout
+  (`apps/web/src/app/tools/layout.tsx`) reads that from the manifests.
 - Size full-height layouts with `height: 100%` / `min-height: 100%`, not `100vh`;
   `100vh` is taller than the space under the header and adds a scrollbar.
 - `position: fixed` is relative to the page's area, not the window
