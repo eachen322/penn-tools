@@ -63,6 +63,7 @@ Leave out `--mentor` when there is none. Don't create or patch the files by hand
 
 After scaffolding, remind the team to:
 - Run `pnpm install`, then `pnpm dev` to work on it
+- Set the tool's `category` in its manifest (`tools/{id}/src/{Name}Tool.ts`): one of `TOOL_CATEGORIES` in `@penntools/core/tools`, which decides its section in the site sidebar and on the dashboard. The scaffold puts it in "LLM Tools", the catch-all, and marks it `beta: true`; delete `beta` when the tool is ready
 - Build the tool with the platform APIs in section 4, using AskPenn and the Platform Playground as the reference tools
 
 ---
@@ -94,7 +95,7 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 > **Usage:** Ask your coding agent: `Implement Database API and refer to the AskPenn (tools/askpenn) implementation for guidance.` The tool team writes `tools/{id}/schema.sql` (and, for reference data, `tools/{id}/seed.mjs`, as Career Canvas does), and its routes or server actions pass `toolSql("<name>")` into the tool's functions. Registering the tool in `TOOLS` in `packages/platform/scripts/setup-tools.mjs` is outside a tool team's scope, so ask the Platform team to add that one line.
 
 #### LLM API (legacy)
-`POST /api/llm/complete`, which uses the platform's key or one the browser sends in `X-Api-Key`. Existing tools keep using it until they migrate; new tools use the AI API instead.
+`POST /api/llm/complete`, which uses the platform's key or one the browser sends in `X-Api-Key`. Existing tools keep using it until they migrate; new tools use the AI API instead. A tool still on it sets `notYetMigrated: true` in its manifest, which shows it as BETA; `pnpm check:tools` fails if a tool calls the legacy API without it, or keeps it after migrating, so remove it when the tool moves to the AI API.
 
 ### How to add an API integration
 

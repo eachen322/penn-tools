@@ -65,8 +65,9 @@ Each tool ships with:
 - **UI components** — co-located under `apps/web/src/app/tools/[tool-id]/`
 
 The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
-tool's title, description and contributors. The site sidebar and the dashboard list
-it, and the info button on its page shows the rest (from `/api/tools`):
+tool's title, description, contributors, category and status. The site sidebar and
+the dashboard list it under its category, and the info button on its page shows the
+rest (from `/api/tools`):
 
 ```ts
 export class AskPennTool extends Tool {
@@ -75,7 +76,9 @@ export class AskPennTool extends Tool {
     title: "AskPenn",
     description: "Chat with an AI assistant for Penn students and staff, …",
     contributors: ["Platform team"],
-    // and an optional mentor
+    category: "Platform", // one of TOOL_CATEGORIES in @penntools/core/tools
+    beta: true,           // shown as BETA
+    // and optionally a mentor, and notYetMigrated (below)
   };
 }
 ```
@@ -221,15 +224,21 @@ page share one user lookup.
 ### Tool catalog
 
 `toolCatalog()` (`apps/web/src/lib/toolCatalog.ts`) sorts every tool on the
-site into sections, for both the site sidebar and the dashboard:
+site into sections, for both the site sidebar and the dashboard. The sections
+are `TOOL_CATEGORIES` (`packages/core/src/tools/Tool.ts`), in that order:
+Recruiting, Academics, Productivity, LLM Tools (the catch-all) and Platform.
+Each holds:
 
-- **Community tools** by category (Recruiting, Academics, Productivity): apps
-  that live outside this repo and open in a new tab, listed by hand in
-  `apps/web/src/data/communityTools.ts`.
-- **LLM Tools (BETA):** every registered tool except the Platform ones, so a new
-  tool appears here as soon as `container.ts` registers it.
-- **Platform:** the tools in `PLATFORM_TOOLS` (the Platform Playground, and
-  AskPenn in beta).
+- **Community tools** in that category: apps that live outside this repo and
+  open in a new tab, listed by hand in `apps/web/src/data/communityTools.ts`.
+- **Registered tools** whose manifest names that category, in the order
+  `container.ts` registers them, so a tool appears as soon as it's registered.
+
+A registered tool is shown as **BETA** when its manifest sets `beta: true` or
+`notYetMigrated: true`. `notYetMigrated` marks a tool still on the legacy LLM
+API; it isn't shown to users except as BETA, and `pnpm check:tools` keeps it
+accurate (it fails if a tool calls `/api/llm/complete` without it, or has it and
+doesn't). A section whose tools are all in beta is marked BETA itself.
 
 ### Site sidebar
 

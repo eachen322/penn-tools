@@ -40,8 +40,6 @@ import { Tool1 } from "@penntools/tool-1";
 toolRegistry.register(new Tool1());
 // import { Tool18 } from "@penntools/tool-18";
 // toolRegistry.register(new Tool18());
-import { AiCompassTool } from "@penntools/tool-ai-compass";
-toolRegistry.register(new AiCompassTool());
 import { PitchCoachTool } from "@penntools/tool-pitch-coach";
 toolRegistry.register(new PitchCoachTool());
 import { AskPennTool } from "@penntools/tool-askpenn";

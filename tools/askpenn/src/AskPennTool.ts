@@ -7,5 +7,7 @@ export class AskPennTool extends Tool {
     title: "AskPenn",
     description: "Chat with an AI assistant for Penn students and staff, using your own OpenAI or Anthropic API key.",
     contributors: ["Platform team"],
+    category: "Platform",
+    beta: true,
   };
 }

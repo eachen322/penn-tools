@@ -14,5 +14,7 @@ export class Tool8 extends Tool {
       "Malvika Sinha",
     ],
     mentor: "Itay Zitvar",
+    category: "LLM Tools",
+    notYetMigrated: true,
   };
 }

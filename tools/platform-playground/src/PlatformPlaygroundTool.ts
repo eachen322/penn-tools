@@ -8,5 +8,6 @@ export class PlatformPlaygroundTool extends Tool {
     description: "Working examples of the platform APIs, for teams building tools.",
     contributors: ["Ananya Chandra", "Ritika Agarwal"],
     mentor: "Ananya Chandra",
+    category: "Platform",
   };
 }

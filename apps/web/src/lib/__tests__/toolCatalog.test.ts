@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
-import type { ToolManifest } from "@penntools/core/tools";
+import type { ToolCategory, ToolManifest } from "@penntools/core/tools";
 import type { CommunityTool } from "../../data/communityTools";
 import { toolCatalog } from "../toolCatalog";
 
-function manifest(id: string, title = id): ToolManifest {
-  return { id, title, description: "", contributors: [] };
+function manifest(id: string, category: ToolCategory, flags: Partial<ToolManifest> = {}): ToolManifest {
+  return { id, title: id, description: "", contributors: [], category, ...flags };
 }
 
-function community(id: string, category: string): CommunityTool {
+function community(id: string, category: ToolCategory): CommunityTool {
   return { id, title: id, description: "", category, builder: "", url: `https://${id}.example` };
 }
 
@@ -15,51 +15,65 @@ const outline = (sections: ReturnType<typeof toolCatalog>) =>
   sections.map((s) => [s.name, s.tools.map((t) => t.title)]);
 
 describe("toolCatalog", () => {
-  it("puts community categories in CATEGORY_ORDER, then unknown ones by name", () => {
-    const sections = toolCatalog([], [
-      community("z", "Zebra"),
-      community("p", "Productivity"),
-      community("a", "Alpha"),
-      community("r", "Recruiting"),
-    ]);
-    expect(sections.map((s) => s.name)).toEqual(["Recruiting", "Productivity", "Alpha", "Zebra"]);
-  });
-
-  it("puts registered tools in LLM Tools, except the Platform ones, in registration order", () => {
+  it("orders sections as TOOL_CATEGORIES does and leaves out empty ones", () => {
     const sections = toolCatalog(
-      [manifest("platform-playground", "Platform Playground"), manifest("b", "B"), manifest("askpenn", "AskPenn"), manifest("a", "A")],
-      [community("q", "Academics")],
+      [manifest("pg", "Platform"), manifest("a", "LLM Tools")],
+      [community("p", "Productivity"), community("r", "Recruiting")],
     );
-    expect(outline(sections)).toEqual([
-      ["Academics", ["q"]],
-      ["LLM Tools", ["B", "A"]],
-      ["Platform", ["Platform Playground", "AskPenn"]],
+    expect(sections.map((s) => [s.id, s.name])).toEqual([
+      ["recruiting", "Recruiting"],
+      ["productivity", "Productivity"],
+      ["llm-tools", "LLM Tools"],
+      ["platform", "Platform"],
     ]);
   });
 
-  it("marks LLM tools and AskPenn as beta, and not community tools or the Platform Playground", () => {
+  it("puts each tool in its category: community tools first, then registered ones in registration order", () => {
+    const sections = toolCatalog(
+      [manifest("b", "Recruiting"), manifest("a", "Recruiting")],
+      [community("q", "Recruiting")],
+    );
+    expect(outline(sections)).toEqual([["Recruiting", ["q", "b", "a"]]]);
+  });
+
+  it("shows a tool as beta when its manifest says so or it hasn't migrated, and never a community tool", () => {
     const tools = toolCatalog(
-      [manifest("platform-playground"), manifest("askpenn"), manifest("a")],
-      [community("q", "Academics")],
+      [
+        manifest("done", "LLM Tools"),
+        manifest("trying", "LLM Tools", { beta: true }),
+        manifest("legacy", "LLM Tools", { notYetMigrated: true }),
+      ],
+      [community("q", "LLM Tools")],
     ).flatMap((s) => s.tools);
     expect(Object.fromEntries(tools.map((t) => [t.key, t.beta]))).toEqual({
       "community-q": false,
-      "tool-a": true,
-      "tool-platform-playground": false,
-      "tool-askpenn": true,
+      "tool-done": false,
+      "tool-trying": true,
+      "tool-legacy": true,
     });
   });
 
+  it("marks a section beta only when every tool in it is", () => {
+    const sections = toolCatalog(
+      [
+        manifest("a", "LLM Tools", { notYetMigrated: true }),
+        manifest("b", "LLM Tools", { beta: true }),
+        manifest("c", "Platform", { beta: true }),
+        manifest("d", "Platform"),
+      ],
+      [],
+    );
+    expect(sections.map((s) => [s.name, s.beta])).toEqual([
+      ["LLM Tools", true],
+      ["Platform", false],
+    ]);
+  });
+
   it("links registered tools to their pages and community tools out", () => {
-    const tools = toolCatalog([manifest("a")], [community("q", "Academics")]).flatMap((s) => s.tools);
+    const tools = toolCatalog([manifest("a", "Academics")], [community("q", "Academics")]).flatMap((s) => s.tools);
     expect(tools.map((t) => [t.href, t.external])).toEqual([
       ["https://q.example", true],
       ["/tools/a", false],
     ]);
-  });
-
-  it("leaves out empty sections and gives each a URL-safe ID", () => {
-    const sections = toolCatalog([manifest("a")], [community("q", "Career & Jobs")]);
-    expect(sections.map((s) => s.id)).toEqual(["career-jobs", "llm-tools"]);
   });
 });

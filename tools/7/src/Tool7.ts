@@ -9,5 +9,7 @@ export class Tool7 extends Tool {
       "AI-powered tool that generates tailored resumes and cover letters from a student's full professional knowledge base",
     contributors: ["Vismay Churiwala", "Nicole Goon", "Hongyu Mao", "Samir Patki"],
     mentor: "Sanjana Wadhwa",
+    category: "LLM Tools",
+    notYetMigrated: true,
   };
 }

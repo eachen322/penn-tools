@@ -11,6 +11,10 @@
 //   - imports Prisma or platform internals; the one platform import allowed is
 //     toolSql from @penntools/platform/db
 //
+// It also checks that each tool's manifest says whether it's still on the
+// legacy LLM API (POST /api/llm/complete): notYetMigrated: true when the tool's
+// code calls it, and not otherwise. The site shows those tools as BETA.
+//
 // Run: pnpm check:tools (optionally with a folder to scan instead of the repo,
 // as the tests do). Existing violations are listed in KNOWN_EXCEPTIONS until
 // those tools migrate; remove an entry once its tool is fixed.
@@ -81,6 +85,50 @@ function platformImports(src) {
   return found;
 }
 
+// A manifest declares its type, so other objects with an `id` don't count.
+const MANIFEST = /\breadonly\s+manifest\s*:\s*ToolManifest\b/;
+const NOT_YET_MIGRATED = /\bnotYetMigrated\s*:\s*true\b/;
+const LEGACY_API = /\/api\/llm\/complete\b/;
+
+/**
+ * Tools whose manifest's notYetMigrated doesn't match their code. A tool is its
+ * folder in tools/ and its page folder in apps/web/src/app/tools/.
+ */
+function migrationViolations() {
+  const found = [];
+  let dirs;
+  try {
+    dirs = readdirSync(join(repoRoot, "tools"));
+  } catch {
+    return found;
+  }
+  for (const dir of dirs) {
+    if (!statSync(join(repoRoot, "tools", dir)).isDirectory()) continue;
+    if (KNOWN_EXCEPTIONS.some((e) => `tools/${dir}/`.startsWith(e.prefix))) continue;
+    const sources = [...walk(join(repoRoot, "tools", dir)), ...walk(join(repoRoot, "apps/web/src/app/tools", dir))].map(
+      (file) => ({ path: relative(repoRoot, file).split(sep).join("/"), src: readFileSync(file, "utf8") }),
+    );
+    const manifest = sources.find((s) => s.path.startsWith(`tools/${dir}/`) && MANIFEST.test(s.src));
+    if (!manifest) continue;
+    const legacy = sources.find((s) => LEGACY_API.test(s.src));
+    const flag = manifest.src.match(NOT_YET_MIGRATED);
+    if (legacy && !flag) {
+      found.push({
+        path: manifest.path,
+        line: lineOf(manifest.src, manifest.src.match(MANIFEST).index),
+        rule: { name: "not yet migrated", fix: `${legacy.path} calls the legacy LLM API; add notYetMigrated: true to the manifest` },
+      });
+    } else if (flag && !legacy) {
+      found.push({
+        path: manifest.path,
+        line: lineOf(manifest.src, flag.index),
+        rule: { name: "not yet migrated", fix: "nothing in the tool calls the legacy LLM API any more; remove notYetMigrated from the manifest" },
+      });
+    }
+  }
+  return found;
+}
+
 function* walk(dir) {
   let entries;
   try {
@@ -115,6 +163,7 @@ for (const root of ROOTS) {
     for (const hit of hits) violations.push({ path, ...hit });
   }
 }
+violations.push(...migrationViolations());
 
 if (violations.length > 0) {
   console.error(`Tool code breaks ${violations.length} platform rule(s):\n`);

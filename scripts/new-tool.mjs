@@ -183,6 +183,11 @@ export class ${className} extends Tool {
     title: ${str(title)},
     description: ${str(description)},
     contributors: [${contributors.map(str).join(", ")}],${mentor ? `\n    mentor: ${str(mentor)},` : ""}
+    // Its section in the site sidebar and on the dashboard, one of TOOL_CATEGORIES
+    // in @penntools/core/tools. "LLM Tools" is the catch-all.
+    category: "LLM Tools",
+    // Shown as BETA until the tool is ready; delete this line then.
+    beta: true,
   };
 }
 `,

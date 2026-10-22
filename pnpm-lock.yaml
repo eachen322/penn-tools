@@ -44,9 +44,6 @@ importers:
       '@penntools/tool-8':
         specifier: workspace:*
         version: link:../../tools/8
-      '@penntools/tool-ai-compass':
-        specifier: workspace:*
-        version: link:../../tools/ai-compass
       '@penntools/tool-askpenn':
         specifier: workspace:*
         version: link:../../tools/askpenn
@@ -224,19 +221,6 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.8
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.1(@types/node@20.19.33)
-
-  tools/ai-compass:
-    dependencies:
-      '@penntools/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
       typescript:
         specifier: ^5.4.0
         version: 5.9.3

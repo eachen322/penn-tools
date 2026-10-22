@@ -1,20 +1,19 @@
-// Community tools shown on the PennTools dashboard.
+// Community tools shown in the site sidebar and on the dashboard.
 //
 // These are apps built by Penn students that live outside this repo, so they
-// link out. Tools registered in the monorepo (tools/*) come from the tool
-// registry and appear in the dashboard's LLM Tools and Platform sections.
+// link out. Tools in the monorepo (tools/*) come from the tool registry, each
+// in the category its manifest names.
+
+import type { ToolCategory } from "@penntools/core/tools";
 
 export interface CommunityTool {
   id: string;
   title: string;
   description: string;
-  category: string;
+  category: ToolCategory;
   builder: string;
   url: string;
 }
-
-/** Display order of categories on the dashboard. */
-export const CATEGORY_ORDER = ["Recruiting", "Academics", "Productivity"];
 
 export const communityTools: CommunityTool[] = [
   {
@@ -76,5 +75,14 @@ export const communityTools: CommunityTool[] = [
     category: "Productivity",
     builder: "Manan Sharma",
     url: "https://chromewebstore.google.com/detail/stactab/hdfcdcoogjkdogmnhhopkekanpldoefh",
+  },
+  {
+    id: "ai-compass",
+    title: "AI Compass",
+    description:
+      "Describe your AI use case, get ranked model recommendations with cost estimates and tradeoffs across 62 models from 29 providers.",
+    category: "Productivity",
+    builder: "Akshit Kalra",
+    url: "https://akshitkalra.com/aicompass",
   },
 ];

@@ -18,7 +18,6 @@
     "@penntools/tool-3": "workspace:*",
     "@penntools/tool-7": "workspace:*",
     "@penntools/tool-8": "workspace:*",
-    "@penntools/tool-ai-compass": "workspace:*",
     "@penntools/tool-askpenn": "workspace:*",
     "@penntools/tool-penn-planner": "workspace:*",
     "@penntools/tool-pitch-coach": "workspace:*",

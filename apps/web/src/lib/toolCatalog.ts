@@ -2,15 +2,16 @@
 // The tool catalog: every tool on the site, by section, for the site sidebar
 // and the dashboard.
 //
-// Community tools (data/communityTools.ts) come first, by category. Then the
-// registered tools, in the order container.ts registers them: the ones in
-// PLATFORM_TOOLS under Platform, and every other one under LLM Tools, in beta.
-// So a new tool appears in LLM Tools as soon as it's registered.
+// The sections are the categories in TOOL_CATEGORIES (@penntools/core/tools),
+// in that order. Each holds the community tools in that category
+// (data/communityTools.ts), then the registered tools whose manifest names it,
+// in the order container.ts registers them. So a tool appears as soon as it's
+// registered, wherever its manifest puts it.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { ToolManifest } from "@penntools/core/tools";
+import { TOOL_CATEGORIES } from "@penntools/core/tools";
+import type { ToolCategory, ToolManifest } from "@penntools/core/tools";
 // Relative, not @/, so the unit tests (which have no path aliases) can load it.
-import { CATEGORY_ORDER } from "../data/communityTools";
 import type { CommunityTool } from "../data/communityTools";
 
 export interface CatalogTool {
@@ -22,28 +23,20 @@ export interface CatalogTool {
   href: string;
   /** Community tools live outside this repo and open in a new tab. */
   external: boolean;
+  /** Its manifest says it's in beta, or it hasn't migrated off the legacy LLM API. */
   beta: boolean;
   /** Screenshot of the tool's homepage, from scripts/capture-tool-screenshots.py. */
   preview: string;
 }
 
 export interface CatalogSection {
-  /** The section's element ID on the dashboard, so it's linked as /#{id}. */
+  /** The section's element ID on the dashboard. */
   id: string;
-  name: string;
+  name: ToolCategory;
   /** Every tool in it is in beta, so the section is marked rather than each tool. */
   beta: boolean;
   tools: CatalogTool[];
 }
-
-/**
- * Registered tools shown under Platform rather than LLM Tools, because they
- * exercise the platform rather than serve students, and whether each is in beta.
- */
-export const PLATFORM_TOOLS: Readonly<Record<string, { beta: boolean }>> = {
-  "platform-playground": { beta: false },
-  askpenn: { beta: true },
-};
 
 function sectionId(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -70,7 +63,7 @@ function fromManifest(m: ToolManifest): CatalogTool {
     builders: m.contributors,
     href: `/tools/${m.id}`,
     external: false,
-    beta: PLATFORM_TOOLS[m.id]?.beta ?? true,
+    beta: m.beta === true || m.notYetMigrated === true,
     preview: `/dashboard/${m.id}.jpg`,
   };
 }
@@ -80,33 +73,11 @@ export function toolCatalog(
   manifests: readonly ToolManifest[],
   community: readonly CommunityTool[],
 ): CatalogSection[] {
-  const rank = (name: string) => {
-    const i = CATEGORY_ORDER.indexOf(name);
-    return i === -1 ? CATEGORY_ORDER.length : i;
-  };
-  const categories = Array.from(new Set(community.map((t) => t.category))).sort(
-    (a, b) => rank(a) - rank(b) || a.localeCompare(b),
-  );
-
-  const sections: CatalogSection[] = categories.map((name) => ({
-    id: sectionId(name),
-    name,
-    beta: false,
-    tools: community.filter((t) => t.category === name).map(fromCommunity),
-  }));
-  sections.push(
-    {
-      id: "llm-tools",
-      name: "LLM Tools",
-      beta: true,
-      tools: manifests.filter((m) => !(m.id in PLATFORM_TOOLS)).map(fromManifest),
-    },
-    {
-      id: "platform",
-      name: "Platform",
-      beta: false,
-      tools: manifests.filter((m) => m.id in PLATFORM_TOOLS).map(fromManifest),
-    },
-  );
-  return sections.filter((s) => s.tools.length > 0);
+  return TOOL_CATEGORIES.map((name) => {
+    const tools = [
+      ...community.filter((t) => t.category === name).map(fromCommunity),
+      ...manifests.filter((m) => m.category === name).map(fromManifest),
+    ];
+    return { id: sectionId(name), name, beta: tools.length > 0 && tools.every((t) => t.beta), tools };
+  }).filter((s) => s.tools.length > 0);
 }

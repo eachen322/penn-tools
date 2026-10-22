@@ -56,12 +56,12 @@ TARGETS = {
         "url": "https://chromewebstore.google.com/detail/stactab/hdfcdcoogjkdogmnhhopkekanpldoefh",
         "crop": (190, 348, 790, 718),
     },
+    "ai-compass": {"url": "https://akshitkalra.com/aicompass"},
     # Registered tools (tools/*), keyed by manifest id
     "7": local("/tools/7"),
     "8": local("/tools/8"),
     "1": local("/tools/1"),
     "penn-planner": local("/tools/penn-planner"),
-    "ai-compass": local("/tools/ai-compass"),
     "pitch-coach": local("/tools/pitch-coach"),
     "platform-playground": local("/tools/platform-playground"),
     "askpenn": local("/tools/askpenn"),

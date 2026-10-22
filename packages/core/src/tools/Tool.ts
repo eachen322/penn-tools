@@ -11,6 +11,14 @@
 
 // ── Tool metadata ─────────────────────────────────────────────────────────────
 
+/**
+ * The sections of the site sidebar and the dashboard, in the order they're
+ * shown. Every tool, registered or community, belongs to one. "LLM Tools" is
+ * the catch-all for tools that don't fit another.
+ */
+export const TOOL_CATEGORIES = ["Recruiting", "Academics", "Productivity", "LLM Tools", "Platform"] as const;
+export type ToolCategory = (typeof TOOL_CATEGORIES)[number];
+
 export interface ToolManifest {
   /** Stable, kebab-case identifier. Never change after the tool ships. */
   id: string;
@@ -20,6 +28,17 @@ export interface ToolManifest {
   contributors: string[];
   /** Student, faculty or staff mentor for this tool, if any. */
   mentor?: string;
+  /** The tool's section in the site sidebar and on the dashboard. */
+  category: ToolCategory;
+  /** Shown as BETA: still under development, and may not be fully functional. */
+  beta?: boolean;
+  /**
+   * Still on the legacy LLM API (POST /api/llm/complete) rather than the AI API.
+   * Not shown to users, except that the tool is shown as BETA until it migrates.
+   * `pnpm check:tools` keeps it accurate: it fails if a tool calls the legacy API
+   * without this, or has this and doesn't.
+   */
+  notYetMigrated?: boolean;
 }
 
 // ── Base class ────────────────────────────────────────────────────────────────
