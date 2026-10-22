@@ -1,30 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import type { ToolManifest } from "@penntools/core/tools";
+// The info button in the corner of a tool's pages: opens the tool's
+// description, contributors and mentor, which ToolsShell passes in.
+
+import { useState } from "react";
+import type { ToolPageInfo } from "@/lib/toolCatalog";
 import styles from "./ToolInfoButton.module.css";
 
-export function ToolInfoButton() {
-  const pathname = usePathname();
+export function ToolInfoButton({ tool }: { tool: ToolPageInfo }) {
   const [open, setOpen] = useState(false);
-  const [manifest, setManifest] = useState<ToolManifest | null>(null);
-
-  useEffect(() => {
-    const match = pathname.match(/^\/tools\/([^/]+)/);
-    if (!match) return;
-    const toolId = match[1];
-
-    fetch("/api/tools")
-      .then((r) => r.json())
-      .then((manifests: ToolManifest[]) => {
-        const found = manifests.find((m) => m.id === toolId);
-        if (found) setManifest(found);
-      })
-      .catch(() => {});
-  }, [pathname]);
-
-  if (!manifest) return null;
 
   return (
     <div className={styles.wrapper}>
@@ -40,9 +24,9 @@ export function ToolInfoButton() {
         <>
           <div className={styles.backdrop} onClick={() => setOpen(false)} />
           <div className={styles.popup} role="dialog" aria-label="Tool info">
-            <Row label={manifest.title} value={manifest.description} />
-            <Row label="Contributors" value={manifest.contributors.join(", ")} />
-            {manifest.mentor && <Row label="Mentor" value={manifest.mentor} />}
+            <Row label={tool.title} value={tool.description} />
+            <Row label="Contributors" value={tool.contributors.join(", ")} />
+            {tool.mentor && <Row label="Mentor" value={tool.mentor} />}
           </div>
         </>
       )}

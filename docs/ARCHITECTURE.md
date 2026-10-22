@@ -67,7 +67,7 @@ Each tool ships with:
 The tool `manifest` (defined in the `Tool` class) is the single source of truth for a
 tool's title, description, contributors, category and status. The site sidebar and
 the dashboard list it under its category, and the info button on its page shows the
-rest (from `/api/tools`):
+rest:
 
 ```ts
 export class AskPennTool extends Tool {
@@ -131,11 +131,13 @@ import { AskPennTool } from "@penntools/tool-askpenn";
 toolRegistry.register(new AskPennTool());
 ```
 
-The registry only holds manifests: the root layout and the home page read it for
-the site sidebar and the dashboard (see **Tool catalog** below), the tools layout
-reads which tools are full-width (see **Page layout**), and `/api/tools` serves it
-to the tool pages' info button. A tool does its work
-from its own pages, routes and server actions.
+The registry only holds manifests, and only server code reads it: the root layout
+and the home page for the site sidebar and the dashboard (see **Tool catalog**
+below), and the tools layout (`apps/web/src/app/tools/layout.tsx`) for each tool's
+pages: whether they're full-width (see **Page layout**) and the details the info
+button shows, which it passes down as `ToolPageInfo` so the browser never gets
+whole manifests. A tool does its work from its own pages, routes and server
+actions.
 
 ---
 

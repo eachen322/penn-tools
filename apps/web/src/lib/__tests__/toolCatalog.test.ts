@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { ToolCategory, ToolManifest } from "@penntools/core/tools";
 import type { CommunityTool } from "../../data/communityTools";
-import { fullWidthToolIds, toolCatalog } from "../toolCatalog";
+import { toolCatalog, toolPageInfo } from "../toolCatalog";
 
 function manifest(id: string, category: ToolCategory, flags: Partial<ToolManifest> = {}): ToolManifest {
   return { id, title: id, description: "", contributors: [], category, ...flags };
@@ -78,15 +78,26 @@ describe("toolCatalog", () => {
   });
 });
 
-describe("fullWidthToolIds", () => {
-  it("lists only the tools whose manifest sets fullWidth", () => {
-    expect(
-      fullWidthToolIds([
-        manifest("chat", "Platform", { fullWidth: true }),
-        manifest("column", "LLM Tools"),
-        manifest("explicit", "LLM Tools", { fullWidth: false }),
-        manifest("canvas", "LLM Tools", { fullWidth: true }),
-      ]),
-    ).toEqual(["chat", "canvas"]);
+describe("toolPageInfo", () => {
+  it("marks only the tools whose manifest sets fullWidth as full-width", () => {
+    const info = toolPageInfo([
+      manifest("chat", "Platform", { fullWidth: true }),
+      manifest("column", "LLM Tools"),
+      manifest("explicit", "LLM Tools", { fullWidth: false }),
+    ]);
+    expect(Object.fromEntries(Object.entries(info).map(([id, t]) => [id, t.fullWidth]))).toEqual({
+      chat: true,
+      column: false,
+      explicit: false,
+    });
+  });
+
+  it("passes the info button's details, and nothing private like notYetMigrated", () => {
+    const info = toolPageInfo([
+      manifest("a", "LLM Tools", { title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace", notYetMigrated: true }),
+      manifest("b", "LLM Tools", { mentor: "" }),
+    ]);
+    expect(info["a"]).toEqual({ title: "A", description: "Does A.", contributors: ["Ada"], mentor: "Grace", fullWidth: false });
+    expect(info["b"]?.mentor).toBeNull();
   });
 });

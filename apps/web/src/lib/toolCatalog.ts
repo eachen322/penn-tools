@@ -68,9 +68,33 @@ function fromManifest(m: ToolManifest): CatalogTool {
   };
 }
 
-/** IDs of the tools whose manifest sets fullWidth, for the tools layout. */
-export function fullWidthToolIds(manifests: readonly ToolManifest[]): string[] {
-  return manifests.filter((m) => m.fullWidth === true).map((m) => m.id);
+/**
+ * What a tool's pages need from its manifest: the info button's details and
+ * whether the page is full-width. Only these go to the browser, not the whole
+ * manifest.
+ */
+export interface ToolPageInfo {
+  title: string;
+  description: string;
+  contributors: string[];
+  mentor: string | null;
+  fullWidth: boolean;
+}
+
+/** Each registered tool's ToolPageInfo, by tool ID, for the tools layout. */
+export function toolPageInfo(manifests: readonly ToolManifest[]): Record<string, ToolPageInfo> {
+  return Object.fromEntries(
+    manifests.map((m) => [
+      m.id,
+      {
+        title: m.title,
+        description: m.description,
+        contributors: m.contributors,
+        mentor: m.mentor || null,
+        fullWidth: m.fullWidth === true,
+      },
+    ]),
+  );
 }
 
 /** The catalog's sections, leaving out empty ones. */
