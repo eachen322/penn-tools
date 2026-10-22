@@ -139,7 +139,6 @@ export function SiteSidebar({
           className={pathname === "/" ? `${styles.item} ${styles.current}` : styles.item}
           aria-current={pathname === "/" ? "page" : undefined}
         >
-          <IconGrid />
           <span className={styles.label}>Dashboard</span>
         </Link>
 
@@ -154,7 +153,6 @@ export function SiteSidebar({
               aria-expanded={expanded}
               aria-controls={`sidebar-${section.id}`}
             >
-              <SectionIcon id={section.id} />
               <span className={styles.label}>{section.name}</span>
               {section.beta && <span className={styles.pill}>BETA</span>}
               <span className={expanded ? styles.chevron : `${styles.chevron} ${styles.chevronCollapsed}`}>
@@ -198,27 +196,6 @@ function Svg({ size = 16, children }: { size?: number; children: ReactNode }) {
   );
 }
 
-function IconGrid() {
-  return <Svg><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></Svg>;
-}
-
 function IconExternal() {
   return <span className={styles.external}><Svg size={12}><path d="M7 17 17 7M8 7h9v9" /></Svg></span>;
-}
-
-function SectionIcon({ id }: { id: string }) {
-  switch (id) {
-    case "recruiting":
-      return <Svg><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18" /></Svg>;
-    case "academics":
-      return <Svg><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c3 2 9 2 12 0v-5" /></Svg>;
-    case "productivity":
-      return <Svg><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" /></Svg>;
-    case "llm-tools":
-      return <Svg><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" /><path d="M19 17v4M17 19h4" /></Svg>;
-    case "platform":
-      return <Svg><path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="m2 17 10 5 10-5M2 12l10 5 10-5" /></Svg>;
-    default:
-      return <Svg><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></Svg>;
-  }
 }
