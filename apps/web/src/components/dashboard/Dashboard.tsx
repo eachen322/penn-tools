@@ -33,7 +33,6 @@ export function Dashboard({ sections }: { sections: CatalogSection[] }) {
                 {section.name} <span className={styles.betaSticker}>BETA</span>
               </h2>
               <p className={styles.betaNote}>
-                {section.id === "llm-tools" && "LLM-powered tools built on the PennTools platform. "}
                 Tools in beta are still under development and may not be fully functional.
               </p>
             </div>

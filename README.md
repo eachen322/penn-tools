@@ -115,11 +115,11 @@ The recommended way is to ask your coding agent:
 
 > "Register new team"
 
-The agent asks for a tool ID (a name like `course-finder`), title, description, contributors and mentor, then runs the scaffold script for you. The new tool appears in the site sidebar and on the dashboard, under LLM Tools, right away. To run it yourself, answer its questions in the terminal, or pass the answers as options (some terminals, such as Git Bash on Windows, can't answer questions):
+The agent asks for a tool ID (a name like `course-finder`), title, description, contributors, category and mentor, then runs the scaffold script for you. The new tool appears in the site sidebar and on the dashboard, under its category, right away. The categories are `TOOL_CATEGORIES` in `packages/core/src/tools/Tool.ts`; to add one, ask the Platform team. To run it yourself, answer its questions in the terminal, or pass the answers as options (some terminals, such as Git Bash on Windows, can't answer questions):
 
 ```bash
 pnpm new-tool
-pnpm new-tool --id course-finder --title "Course Finder" --description "Find Penn courses by topic." --contributors "Ada Lovelace, Alan Turing" --mentor "Grace Hopper"
+pnpm new-tool --id course-finder --title "Course Finder" --description "Find Penn courses by topic." --contributors "Ada Lovelace, Alan Turing" --category Academics --mentor "Grace Hopper"
 ```
 
 Then build the tool with the platform APIs (user, AI, embeddings, database): section 4 of `CLAUDE.md` says how, with AskPenn (`tools/askpenn`) and the Platform Playground (`tools/platform-playground`) as the reference tools. Tool code may only use those APIs, and `pnpm check:tools` checks it. See `docs/ARCHITECTURE.md` for how the tool system works.

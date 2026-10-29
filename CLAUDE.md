@@ -51,19 +51,20 @@ When the user says "Register new team", collect these inputs one at a time:
 2. **Tool title** — human-readable, e.g. `"Course Finder"`
 3. **Short description** — one sentence
 4. **Contributors** — comma-separated names
-5. **Mentor name** — optional
+5. **Category** — the tool's section in the site sidebar and on the dashboard. Offer the choices in `TOOL_CATEGORIES` (`packages/core/src/tools/Tool.ts`) with what each covers, from the comment above it; leave out Platform, which is for the Platform team's own tools. A tool that fits none goes in Other. If the team wants a category that doesn't exist, tell them to ask the Platform team to add it, and pick the closest existing one for now; it's a one-line change in their manifest later
+6. **Mentor name** — optional
 
 Show a summary and ask for confirmation. Then run the scaffold script with the answers, quoting each value for the shell:
 
 ```
-pnpm new-tool --id course-finder --title "Course Finder" --description "…" --contributors "Ada Lovelace, Alan Turing" --mentor "Grace Hopper" --yes
+pnpm new-tool --id course-finder --title "Course Finder" --description "…" --contributors "Ada Lovelace, Alan Turing" --category "Academics" --mentor "Grace Hopper" --yes
 ```
 
 Leave out `--mentor` when there is none. Don't create or patch the files by hand. The script creates `tools/{id}/` (`package.json`, `tsconfig.json`, `src/{Name}Tool.ts` with the manifest, `src/index.ts`) and a placeholder page at `apps/web/src/app/tools/{id}/page.tsx`, and registers the tool in `apps/web/package.json` and `apps/web/src/lib/container.ts`. It checks everything before writing, so if it fails it has changed nothing: fix the input it names and run it again.
 
 After scaffolding, remind the team to:
 - Run `pnpm install`, then `pnpm dev` to work on it
-- Set the tool's `category` in its manifest (`tools/{id}/src/{Name}Tool.ts`): one of `TOOL_CATEGORIES` in `@penntools/core/tools`, which decides its section in the site sidebar and on the dashboard. The scaffold puts it in "LLM Tools", the catch-all, and marks it `beta: true`; delete `beta` when the tool is ready
+- Delete `beta: true` from the manifest (`tools/{id}/src/{Name}Tool.ts`) when the tool is ready; until then it's shown as BETA. To move the tool to another section, change its `category` there, to one of `TOOL_CATEGORIES` in `@penntools/core/tools`
 - Build the tool with the platform APIs in section 4, using AskPenn and the Platform Playground as the reference tools
 
 ---
@@ -153,7 +154,7 @@ Tables of the tool's own, in a Postgres schema that only the tool can access (se
 | DB / AI implementations | `packages/platform/` | Platform team |
 | Web app + API routes | `apps/web/src/` | Platform team |
 | Tool registration | `apps/web/src/lib/container.ts` | `pnpm new-tool` writes it; otherwise the Platform team |
-| Tool categories (sidebar and dashboard sections) | `TOOL_CATEGORIES` in `packages/core/src/tools/Tool.ts` | Platform team; a tool team picks one in its manifest |
+| Tool categories (sidebar and dashboard sections) | `TOOL_CATEGORIES` in `packages/core/src/tools/Tool.ts` | Platform team, who add categories when tool teams ask; a tool team picks one in its manifest |
 | Community tools (apps outside this repo) | `apps/web/src/data/communityTools.ts` | Platform team |
 | Tool landing pages | `apps/web/src/app/tools/{id}/` | That tool's team |
 | Tool implementations | `tools/{id}/` | That tool's team |

@@ -239,8 +239,10 @@ page share one user lookup.
 `toolCatalog()` (`apps/web/src/lib/toolCatalog.ts`) sorts every tool on the
 site into sections, for both the site sidebar and the dashboard. The sections
 are `TOOL_CATEGORIES` (`packages/core/src/tools/Tool.ts`), in that order:
-Recruiting, Academics, Productivity, LLM Tools (the catch-all) and Platform.
-Each holds:
+Recruiting, Academics, Finance, Entrepreneurship, Productivity, Lifestyle,
+Other (the catch-all) and Platform. A comment there says what each covers;
+`pnpm new-tool` requires one and reads the list from that file. Only the
+Platform team adds categories. Each holds:
 
 - **Community tools** in that category: apps that live outside this repo and
   open in a new tab, listed by hand in `apps/web/src/data/communityTools.ts`.

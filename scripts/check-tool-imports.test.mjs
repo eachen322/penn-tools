@@ -93,7 +93,7 @@ const LEGACY_MANIFEST = (flag) =>
     `export class Demo extends Tool {`,
     `  readonly manifest: ToolManifest = {`,
     `    id: "demo",`,
-    `    category: "LLM Tools",`,
+    `    category: "Other",`,
     ...(flag ? [`    notYetMigrated: true,`] : []),
     `  };`,
     `}`,
