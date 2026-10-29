@@ -46,6 +46,19 @@ export function Dashboard({ sections }: { sections: CatalogSection[] }) {
           </div>
         </section>
       ))}
+
+      {/* Google's OAuth verification needs the privacy policy linked from the home page. */}
+      <footer className={styles.footer}>
+        <p>
+          PennTools is a student project of the Wharton AI &amp; Analytics Club. It is not an official service of
+          the University of Pennsylvania.
+        </p>
+        <p>
+          <Link href="/privacy" className={styles.footerLink}>Privacy policy</Link>
+          {" · "}
+          <a href="mailto:waiac.platform@gmail.com" className={styles.footerLink}>Contact</a>
+        </p>
+      </footer>
     </div>
   );
 }
