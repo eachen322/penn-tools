@@ -10,6 +10,13 @@ const config = {
   },
   async redirects() {
     return [
+      // The site moved from its Railway domain; send old links to the same page on the new one.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "penn-tools.up.railway.app" }],
+        destination: "https://penntools.org/:path*",
+        permanent: true,
+      },
       // AI Compass was a registered tool whose page only redirected here; it's a community tool now.
       { source: "/tools/ai-compass", destination: "https://akshitkalra.com/aicompass", permanent: true },
       // Tools that had numeric IDs, so old links and bookmarks keep working.
