@@ -13,7 +13,7 @@ const config = {
       // The site moved from its Railway domain; send old links to the same page on the new one.
       {
         source: "/:path*",
-        has: [{ type: "host", value: "penn-tools.up.railway.app" }],
+        has: [{ type: "host", value: "penntools.up.railway.app" }],
         destination: "https://penntools.org/:path*",
         permanent: true,
       },
